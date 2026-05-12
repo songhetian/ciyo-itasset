@@ -20,7 +20,7 @@
 
 ## 📚 部署文档
 
-- **发布包部署**: [点击查看详细文档](https://gitee.com/sanbox/ciyo-itasset/wikis/%E5%8F%91%E5%B8%83%E5%8C%85%E9%83%A8%E7%BD%B2)
+- **发布包部署（新手强烈推荐）**: [点击查看详细文档](https://gitee.com/sanbox/ciyo-itasset/wikis/%E5%8F%91%E5%B8%83%E5%8C%85%E9%83%A8%E7%BD%B2)
 
 ## ✨ 核心功能
 
