@@ -105,7 +105,7 @@ pnpm dev
 
 ## 交流群
 
-<img src="readmeimg/微信图片_20260309094638_106_20.jpg" width="500" height="400" alt="交流群">
+<img src="readmeimg/20260309094638_106_20.jpg" width="500" height="400" alt="交流群">
 
 ## 📄 许可证
 
