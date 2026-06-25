@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://127.0.0.1:3306/ciyo-itam?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
-    username: root
-    password: root
+    url: jdbc:mysql://${MYSQL_HOST:mysql}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:ciyo_itam}?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&tinyInt1isBit=false&nullCatalogMeansCurrent=true&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:ciyo}
+    password: ${MYSQL_PASSWORD:ciyo123456}
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       minimum-idle: 5
@@ -15,13 +15,29 @@ spring:
   data:
     redis:
       database: 0
-      port: 6389
-      password:
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
       timeout: 6000ms
-      host: localhost
+      host: ${REDIS_HOST:redis}
 
 logging:
   level:
     com.ciyocloud: debug
   config: classpath:logback-spring.xml
+
+# 密码加密配置
+password:
+  rsa:
+    private-key: |
+      MIIBVAIBADANBgkqhkiG9w0BAQEFAASCAT4wggE6AgEAAkEArFSp7f9RcrewO1Mw
+      Pyrpc1a9UhOdnGAZiu42hZJeu++QZ+Bb9KzwF9dOFEwAv+aIhGrwbr7XERdMFMR2
+      D8MEoQIDAQABAkBtUSOegtjC4b0cVPAFEg6XCM39082mVdu+ItBZOPl5Uzo9BHRD
+      xnr5oTkcCRDB+mZELkioeUFa/uqivTaqzDkBAiEA441k+Votl6zXaez6kV9uVXQC
+      fBKPgOEAZFTP603p9LECIQDB3/O4UbtWLQN1Tf6Tj19zGI7AS0BaEmgw6cx4bnDK
+      8QIgavOjOPvkn/ySBuxmXPuArVNoc455unaGq6GdVBh71RECIHqSdmn/8mrHRrpx
+      NxRfvr7rtcTJTsQjgw/5oLY7TMBhAiEA2zk34VyWtKPRUdfFWAHjQoyQ2DJtqvs4
+      xrYzu/CSTbU=
+    public-key: |
+      MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAKxUqe3/UXK3sDtTMD8q6XNWvVITnZxg
+      GYruNoWSXrvvkGfgW/Ss8BfXThRMAL/miIRq8G6+1xEXTBTEdg/DBKECAwEAAQ==
 

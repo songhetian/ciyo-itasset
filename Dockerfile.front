@@ -1,0 +1,55 @@
+# =============================================
+# 前端 Docker 构建文件
+# 使用 nginx 托管静态文件
+# =============================================
+
+# 阶段一: Node 构建前端
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# 安装 pnpm
+RUN npm install -g pnpm@8
+
+# 复制前端代码
+COPY itasset-front/package.json itasset-front/pnpm-lock.yaml* ./
+COPY itasset-front/pnpm-workspace.yaml* ./
+
+# 安装依赖
+RUN pnpm install
+
+# 复制前端源码
+COPY itasset-front/ ./
+
+# 设置 API 地址（根据环境变量）
+ARG VITE_API_URL=/api
+ENV VITE_API_URL=${VITE_API_URL}
+
+# 构建前端
+RUN pnpm build
+
+# =============================================
+
+# 阶段二: nginx 运行镜像
+FROM nginx:alpine
+
+# 使用阿里云镜像源加速 apk
+RUN echo 'https://mirrors.aliyun.com/alpine/v3.18/main' > /etc/apk/repositories && \
+    echo 'https://mirrors.aliyun.com/alpine/v3.18/community' >> /etc/apk/repositories && \
+    apk add --no-cache bash
+
+# 从构建阶段复制前端产物
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# 复制 nginx 配置文件
+COPY nginx/nginx.conf /etc/nginx/nginx.conf
+
+# 暴露端口
+EXPOSE 80
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --quiet --tries=1 --spider http://localhost/health || exit 1
+
+# 启动命令
+CMD ["nginx", "-g", "daemon off;"]

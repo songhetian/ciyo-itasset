@@ -1,0 +1,67 @@
+# =============================================
+# Docker 构建忽略文件
+# =============================================
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.iml
+*.ipr
+*.iws
+
+# 前端开发文件
+itasset-front/node_modules
+itasset-front/dist
+itasset-front/.env
+itasset-front/.env.local
+itasset-front/.env.development
+itasset-front/.env.production
+
+# 后端构建产物
+ciyo-admin/target
+ciyo-asset/target
+ciyo-common/target
+ciyo-file/target
+ciyo-generator/target
+ciyo-job/target
+ciyo-message/target
+ciyo-system/target
+
+# Maven
+*.jar
+*.class
+*.war
+*.ear
+
+# 日志
+*.log
+logs/
+
+# Docker 文件（不需要打包进镜像）
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# 文档
+*.md
+docs/
+
+# 其他
+*.bak
+*.tmp
+*.swp
+*.orig
+.DS_Store
+Thumbs.db
+
+# TRAE 配置
+.trae/
+
+# 本地环境文件
+.env.local
+.env.*.local

@@ -1,0 +1,63 @@
+{
+  "name": "ciyo-itasset",
+  "version": "1.0.0",
+  "description": "西柚IT资产管理系统 - Docker 部署工具",
+  "private": true,
+  "engines": {
+    "node": ">=20.19.0",
+    "pnpm": ">=8.8.0"
+  },
+  "scripts": {
+    "=========================================== 安装/初始化命令 ===========================================": "",
+    "install:front": "cd itasset-front && pnpm install",
+    "install:all": "npm install && npm run install:front",
+    "init": "npm run install:all && npm run docker:up:build && npm run docker:logs",
+    "=========================================== Docker 完整环境（推荐生产环境） ===========================================": "",
+    "docker:up": "docker-compose up -d",
+    "docker:up:build": "docker-compose up -d --build",
+    "docker:down": "docker-compose down",
+    "docker:restart": "docker-compose restart",
+    "docker:logs": "docker-compose logs -f",
+    "docker:rebuild": "docker-compose down && docker-compose up -d --build",
+    "docker:clean": "docker-compose down -v --remove-orphans",
+    "=========================================== Docker 单服务命令 ===========================================": "",
+    "docker:logs:app": "docker-compose logs -f app",
+    "docker:logs:mysql": "docker-compose logs -f mysql",
+    "docker:logs:nginx": "docker-compose logs -f nginx",
+    "docker:build:app": "docker build -t ciyo-app -f Dockerfile .",
+    "docker:build:front": "docker build -t ciyo-nginx -f Dockerfile.front .",
+    "docker:status": "docker-compose ps",
+    "docker:shell:app": "docker exec -it ciyo-app bash",
+    "docker:shell:mysql": "docker exec -it ciyo-mysql bash",
+    "docker:shell:nginx": "docker exec -it ciyo-nginx sh",
+    "docker:mysql": "docker exec -it ciyo-mysql mysql -u${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE}",
+    "=========================================== Nginx 相关（生产环境） ===========================================": "",
+    "docker:nginx": "docker-compose up -d nginx",
+    "docker:nginx:build": "docker-compose up -d --build nginx",
+    "docker:nginx:reload": "docker exec ciyo-nginx nginx -s reload",
+    "docker:nginx:restart": "docker-compose restart nginx",
+    "=========================================== 本地开发命令 ===========================================": "",
+    "dev": "cd ciyo-admin && mvn spring-boot:run",
+    "dev:front": "cd itasset-front && pnpm dev",
+    "dev:all": "concurrently \"npm run dev\" \"npm run dev:front\"",
+    "=========================================== 构建命令 ===========================================": "",
+    "build:front": "cd itasset-front && pnpm build",
+    "build:jar": "cd ciyo-admin && mvn clean package -DskipTests",
+    "build:all": "npm run build:front && npm run build:jar",
+    "=========================================== 工具命令 ===========================================": "",
+    "clean": "docker-compose down -v && docker system prune -f"
+  },
+  "keywords": [
+    "ciyo",
+    "itasset",
+    "docker",
+    "nginx",
+    "springboot",
+    "vue"
+  ],
+  "author": "ciyocloud",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
