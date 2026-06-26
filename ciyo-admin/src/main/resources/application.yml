@@ -62,12 +62,12 @@ sa-token:
   # token 名称（同时也是 cookie 名称）
   token-name: Authorization
   # token 有效期（单位：秒）默认120分钟，-1 代表永久有效
-  # 生产环境建议设置为 1800（30分钟）
-  timeout: 1800
+  # 生产环境建议设置为 3600（1小时无操作退出）
+  timeout: 3600
   # token 最低活跃频率（单位：秒）
   # 如果 token 超过此时间没有访问系统就会被冻结
-  # 设置为 600（10分钟）强制用户定期重新认证
-  active-timeout: 600
+  # 设置为 -1 表示不限制（根据 timeout 过期时间自动失效）
+  active-timeout: -1
   # 是否允许同一账号多地同时登录（为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
   is-concurrent: true
   # 在多人登录同一账号时，是否共用一个 token（为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）

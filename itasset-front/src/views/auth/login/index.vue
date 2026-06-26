@@ -114,6 +114,23 @@
   const { t, locale } = useI18n()
   const formKey = ref(0)
 
+  // 记住密码存储键
+  const REMEMBER_USERNAME_KEY = 'sys-remember-username'
+  const REMEMBER_PASSWORD_KEY = 'sys-remember-password'
+
+  // 加载记住的密码
+  onMounted(() => {
+    const savedUsername = localStorage.getItem(REMEMBER_USERNAME_KEY)
+    const savedPassword = localStorage.getItem(REMEMBER_PASSWORD_KEY)
+    if (savedUsername) {
+      formData.username = savedUsername
+    }
+    if (savedPassword) {
+      formData.password = savedPassword
+      formData.rememberPassword = true
+    }
+  })
+
   // 功能特点列表
   const features = computed(() => [
     {
@@ -185,6 +202,15 @@
       // 存储 token 和登录状态
       userStore.setToken(token)
       userStore.setLoginStatus(true)
+
+      // 记住密码处理
+      if (formData.rememberPassword) {
+        localStorage.setItem(REMEMBER_USERNAME_KEY, username)
+        localStorage.setItem(REMEMBER_PASSWORD_KEY, password)
+      } else {
+        localStorage.removeItem(REMEMBER_USERNAME_KEY)
+        localStorage.removeItem(REMEMBER_PASSWORD_KEY)
+      }
 
       // 登录成功处理
       showLoginSuccessNotice()
