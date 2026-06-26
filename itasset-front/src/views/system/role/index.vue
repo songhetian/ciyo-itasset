@@ -16,6 +16,7 @@
               :disabled="multiple"
               icon="ele-Delete"
               type="danger"
+              plain
               @click="handleDelete"
             >
               {{ $t('system.roleManagement.delete') }}
@@ -45,7 +46,7 @@
             <el-button link type="primary" @click="handleUpdate(row)" v-hasPermi="['system:role:edit']">
               {{ $t('system.roleManagement.edit') }}
             </el-button>
-            <el-button link type="primary" @click="handleDataScope(row)" v-hasPermi="['system:role:edit']">
+            <el-button link type="warning" @click="handleDataScope(row)" v-hasPermi="['system:role:edit']">
               {{ $t('system.roleManagement.dataPermission') }}
             </el-button>
             <el-button link type="danger" @click="handleDelete(row)" v-hasPermi="['system:role:remove']">
@@ -116,8 +117,8 @@
       </el-form>
       <template #footer>
         <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="submitForm">
-          {{ $t('common.confirm') }}
+        <el-button type="primary" :loading="submitLoading" @click="submitForm">
+          {{ submitLoading ? $t('common.saving') : $t('common.confirm') }}
         </el-button>
       </template>
     </el-dialog>
@@ -168,8 +169,8 @@
       </el-form>
       <template #footer>
         <el-button @click="cancelDataScope">{{ $t('common.cancel') }}</el-button>
-        <el-button type="primary" @click="submitDataScope">
-          {{ $t('common.confirm') }}
+        <el-button type="primary" :loading="submitLoading" @click="submitDataScope">
+          {{ submitLoading ? $t('common.saving') : $t('common.confirm') }}
         </el-button>
       </template>
     </el-dialog>
@@ -186,6 +187,7 @@
   import RoleSearch from './modules/role-search.vue'
   import { useTable } from '@/hooks/core/useTable'
   import { useI18n } from 'vue-i18n'
+  import { MessageBoxUtil } from '@/utils/messageUtil'
 
   const { t } = useI18n()
 
@@ -196,6 +198,8 @@
 
   // 导出遮罩层
   const exportLoading = ref(false)
+  // 提交loading状态
+  const submitLoading = ref(false)
   // 选中数组
   const ids = ref<number[]>([])
   // 非单个禁用
@@ -564,6 +568,7 @@
     const valid = await formRef.value!.validate()
     if (valid) {
       form.value.menuIds = getMenuAllCheckedKeys()
+      submitLoading.value = true
       try {
         if (form.value.id !== undefined) {
           await updateRole(form.value)
@@ -575,6 +580,8 @@
         getList()
       } catch (error) {
         console.error('Failed to submit form:', error)
+      } finally {
+        submitLoading.value = false
       }
     }
   }
@@ -583,6 +590,7 @@
   const submitDataScope = async () => {
     if (form.value.id !== undefined) {
       form.value.deptIds = getDeptAllCheckedKeys()
+      submitLoading.value = true
       try {
         await dataScope(form.value)
         ElMessage.success(t('system.roleManagement.dataScopeSuccess'))
@@ -590,6 +598,8 @@
         getList()
       } catch (error) {
         console.error('Failed to submit data scope:', error)
+      } finally {
+        submitLoading.value = false
       }
     }
   }
@@ -597,18 +607,17 @@
   /** 删除按钮操作 */
   const handleDelete = async (row: any) => {
     const roleIds = row.id || ids.value
-    try {
-      await ElMessageBox.confirm(t('system.roleManagement.isDelete'), t('common.warning'), {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
-      })
-      await delRole(roleIds)
-      getList()
-      ElMessage.success(t('common.saveSuccess'))
-    } catch {
-      // User cancelled or error occurred
-    }
+    const isBatch = !row.id
+    await MessageBoxUtil.confirmDelete(
+      async () => {
+        await delRole(roleIds)
+        await getList()
+      },
+      {
+        itemName: '角色',
+        count: isBatch ? ids.value.length : undefined
+      }
+    )
   }
 
   /** 导出按钮操作 */

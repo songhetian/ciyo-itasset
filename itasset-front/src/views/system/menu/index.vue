@@ -52,7 +52,7 @@
             <el-button link type="primary" @click="handleUpdate(row)" v-hasPermi="['system:menu:edit']">
               {{ $t('common.update') }}
             </el-button>
-            <el-button link type="primary" @click="handleAdd(row)" v-hasPermi="['system:menu:add']">
+            <el-button link type="warning" @click="handleAdd(row)" v-hasPermi="['system:menu:add']">
               {{ $t('common.add') }}
             </el-button>
             <el-button link type="danger" @click="handleDelete(row)" v-hasPermi="['system:menu:remove']">
@@ -173,8 +173,8 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button type="primary" @click="submitForm">
-            {{ $t('common.confirm') }}
+          <el-button type="primary" :loading="saveLoading" @click="submitForm">
+            {{ saveLoading ? $t('common.saving') : $t('common.confirm') }}
           </el-button>
         </div>
       </template>
@@ -200,7 +200,7 @@
   import { ElMessageBox } from 'element-plus'
   import { getDicts } from '@/api/system/dict/data'
   import { handleTree, parseTime, selectDictLabel } from '@/utils/business'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import { useI18n } from 'vue-i18n'
   import { useTableColumns } from '@/hooks/core/useTableColumns'
 
@@ -210,6 +210,7 @@
 
   // 状态和引用
   const loading = ref(true)
+  const saveLoading = ref(false)
   const showSearch = ref(true)
   const menuList = ref<MenuEntity[]>([])
   const menuOptions = ref<any[]>([])
@@ -528,37 +529,31 @@
   const submitForm = () => {
     formRef.value!.validate((valid: boolean) => {
       if (valid) {
-        if (form.value.id !== undefined) {
-          updateMenu(form.value).then(() => {
+        saveLoading.value = true
+        const action = form.value.id !== undefined ? updateMenu(form.value) : addMenu(form.value)
+        action
+          .then(() => {
             MessageUtil.success(t('common.saveSuccess'))
             open.value = false
             getList()
           })
-        } else {
-          addMenu(form.value).then(() => {
-            MessageUtil.success(t('common.saveSuccess'))
-            open.value = false
-            getList()
+          .finally(() => {
+            saveLoading.value = false
           })
-        }
       }
     })
   }
 
   const handleDelete = (row: any) => {
-    ElMessageBox.confirm(t('system.menu.isDelete'), t('common.warning'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning'
-    })
-      .then(() => {
-        return delMenu(row.id)
-      })
-      .then(() => {
-        getList()
-        MessageUtil.success(t('common.saveSuccess'))
-      })
-      .catch(() => {})
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delMenu(row.id)
+        await getList()
+      },
+      {
+        itemName: '菜单'
+      }
+    )
   }
 </script>
 

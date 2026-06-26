@@ -44,6 +44,9 @@ public final class OssStorageFactory {
 
     public static OssStorageService getStorageService() {
         if (null == storageService) {
+            build();
+        }
+        if (null == storageService) {
             throw new BusinessException("未配置文件存储，请配置后使用");
         }
         return storageService;

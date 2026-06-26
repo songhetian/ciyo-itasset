@@ -1,23 +1,50 @@
 @use '@styles/core/mixin.scss' as *;
 
 // 菜单样式变量
-$menu-height: 42px;
-$menu-icon-size: 20px;
+$menu-height: 46px;
+$menu-icon-size: 18px;
 $menu-font-size: 14px;
-$hover-bg-color: var(--art-gray-200);
+$hover-bg-color: var(--art-gray-100);
 $popup-menu-height: 40px;
 $popup-menu-padding: 8px;
-$popup-menu-margin: 5px;
-$popup-menu-radius: 6px;
+$popup-menu-margin: 4px;
+$popup-menu-radius: 8px;
+$menu-item-spacing: 6px;
 
 // 通用菜单项样式
 @mixin menu-item-base {
-  width: calc(100% - 16px);
-  margin-left: 8px;
-  border-radius: 6px;
+  width: calc(100% - 20px);
+  margin-left: 10px;
+  margin-right: 10px;
+  border-radius: 10px;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:active {
+    transform: scale(0.97);
+  }
 
   .menu-icon {
-    margin-left: -7px;
+    margin-left: 0;
+    margin-right: 12px;
+  }
+
+  .menu-name {
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+}
+
+// 子菜单项样式
+@mixin sub-menu-item-base {
+  .menu-name {
+    font-weight: 400;
+    font-size: 13px !important;
+  }
+
+  .menu-icon {
+    opacity: 0.7;
+    transform: scale(0.85);
   }
 }
 
@@ -32,13 +59,31 @@ $popup-menu-radius: 6px;
 // 通用选中样式
 @mixin menu-active($color, $bg-color, $icon-color: var(--theme-color)) {
   .el-menu-item.is-active {
+    position: relative;
     color: $color !important;
     background-color: $bg-color;
+    font-weight: 600;
+
+    &::before {
+      position: absolute;
+      top: 50%;
+      left: -10px;
+      width: 4px;
+      height: 22px;
+      content: '';
+      background: $color;
+      border-radius: 0 4px 4px 0;
+      transform: translateY(-50%);
+    }
 
     .menu-icon {
       .art-svg-icon {
         color: $icon-color !important;
       }
+    }
+
+    .menu-name {
+      font-weight: 600;
     }
   }
 }
@@ -60,9 +105,45 @@ $popup-menu-radius: 6px;
 
 // 主题菜单通用样式（合并 design 和 dark 主题的共同逻辑）
 @mixin theme-menu-base {
-  .el-sub-menu__title,
-  .el-menu-item {
+  > .el-sub-menu,
+  > .el-menu-item {
     @include menu-item-base;
+  }
+
+  // 一级菜单间距
+  > .el-sub-menu,
+  > .el-menu-item {
+    margin-bottom: $menu-item-spacing;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // 子菜单样式（增加缩进和视觉区分）
+  .el-sub-menu .el-sub-menu {
+    .el-sub-menu__title,
+    .el-menu-item {
+      @include sub-menu-item-base;
+      width: calc(100% - 32px) !important;
+      margin-left: 32px !important;
+      height: 42px !important;
+      line-height: 42px !important;
+      margin-bottom: 2px;
+      border-radius: 8px;
+    }
+  }
+
+  // 父级菜单标题加粗
+  > .el-sub-menu > .el-sub-menu__title {
+    .menu-name {
+      font-weight: 600;
+    }
+  }
+
+  // 子菜单背景区分
+  > .el-sub-menu > .el-menu {
+    padding-bottom: 4px;
   }
 }
 
@@ -121,7 +202,7 @@ $popup-menu-radius: 6px;
   .el-sub-menu__title,
   .el-menu-item {
     height: $menu-height !important;
-    margin-bottom: 4px;
+    margin-bottom: $menu-item-spacing;
     line-height: $menu-height !important;
 
     span {
@@ -129,6 +210,12 @@ $popup-menu-radius: 6px;
 
       @include ellipsis();
     }
+  }
+
+  // 菜单整体内边距
+  .el-menu {
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 
   // 右侧箭头

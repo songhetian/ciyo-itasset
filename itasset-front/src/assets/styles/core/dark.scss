@@ -7,6 +7,9 @@ $font-color: rgba(#ffffff, 0.85);
 
 /* 覆盖element-plus默认深色背景色 */
 html.dark {
+  // 原生控件暗色支持
+  color-scheme: dark;
+
   // element-plus
   --el-bg-color: var(--default-box-color);
   --el-text-color-regular: #{$font-color};
@@ -88,6 +91,119 @@ html.dark {
 
     .w-e-modal {
       background-color: var(--art-color);
+    }
+  }
+
+  // 卡片暗黑主题适配
+  .el-card {
+    background-color: var(--default-box-color);
+    border-color: var(--art-gray-200);
+
+    .el-card__header {
+      border-bottom-color: var(--art-gray-200);
+    }
+  }
+
+  // 抽屉暗黑主题适配
+  .el-drawer {
+    background-color: var(--default-box-color);
+
+    .el-drawer__header {
+      border-bottom-color: var(--art-gray-200);
+    }
+
+    .el-drawer__footer {
+      border-top-color: var(--art-gray-200);
+    }
+  }
+
+  // 标签页暗黑主题适配
+  .el-tabs {
+    .el-tabs__header {
+      border-bottom-color: var(--art-gray-200);
+    }
+
+    .el-tabs__nav-wrap::after {
+      background-color: var(--art-gray-200);
+    }
+  }
+
+  // 时间线暗黑主题适配
+  .el-timeline {
+    .el-timeline-item__tail {
+      background-color: var(--art-gray-200);
+    }
+  }
+
+  // 上传组件暗黑主题适配
+  .el-upload {
+    .el-upload-dragger {
+      background-color: var(--art-gray-50);
+      border-color: var(--art-gray-300);
+
+      &:hover {
+        background-color: color-mix(in srgb, var(--el-color-primary) 5%, var(--art-gray-50));
+      }
+    }
+
+    .el-upload-list {
+      .el-upload-list__item {
+        background-color: var(--art-gray-50);
+
+        &:hover {
+          background-color: var(--art-gray-100);
+        }
+      }
+    }
+  }
+
+  // 进度条暗黑主题适配
+  .el-progress {
+    .el-progress-bar {
+      .el-progress-bar__outer {
+        background-color: var(--art-gray-100);
+      }
+    }
+  }
+
+  // 级联选择器暗黑主题适配
+  .el-cascader-panel {
+    background-color: var(--default-box-color);
+    border-color: var(--art-gray-200);
+
+    .el-cascader-menu {
+      border-right-color: var(--art-gray-200);
+
+      .el-cascader-menu__item {
+        &:hover {
+          background-color: var(--art-gray-50);
+        }
+      }
+    }
+  }
+
+  // 分割线暗黑主题适配
+  .el-divider {
+    .el-divider__text {
+      background-color: var(--default-box-color);
+    }
+  }
+
+  // 空状态暗黑主题适配
+  .el-empty {
+    .el-empty__description {
+      color: var(--art-gray-500);
+    }
+  }
+
+  // 加载状态暗黑主题适配
+  .el-loading-mask {
+    background-color: color-mix(in srgb, var(--default-box-color) 80%, transparent);
+
+    .el-loading-spinner {
+      .el-loading-text {
+        color: var(--art-gray-600);
+      }
     }
   }
 }

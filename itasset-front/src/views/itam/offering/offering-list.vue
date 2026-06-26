@@ -32,6 +32,7 @@
               <el-button
                 :disabled="!selectedRows.length"
                 type="danger"
+                plain
                 v-ripple
                 icon="ele-Delete"
                 @click="handleDelete"
@@ -77,7 +78,7 @@
             <span v-else>{{ row.endDate }}</span>
           </template>
           <template #operation="{ row }">
-            <el-button link type="primary" @click="handleAssignDevice(row)" v-hasPermi="['itam:offering:update']">
+            <el-button link type="warning" @click="handleAssignDevice(row)" v-hasPermi="['itam:offering:update']">
               分配设备
             </el-button>
             <el-button link type="warning" @click="handleReportException(row)" v-hasPermi="['itam:offering:update']">
@@ -139,7 +140,9 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button :loading="saveLoading" type="primary" @click="submitForm">{{ $t('common.submit') }} </el-button>
+          <el-button :loading="saveLoading" type="primary" @click="submitForm">
+            {{ saveLoading ? (form.id ? t('common.saving') : t('common.adding')) : $t('common.submit') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>

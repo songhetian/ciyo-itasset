@@ -29,6 +29,7 @@
               <el-button
                 :disabled="!selectedRows.length"
                 type="danger"
+                plain
                 v-ripple
                 icon="ele-Delete"
                 @click="handleDelete"
@@ -63,7 +64,7 @@
           @pagination:current-change="handleCurrentChange"
         >
           <template #operation="{ row }">
-            <el-button link type="primary" @click="handleAssignToDevice(row)" v-hasPermi="['itam:licenses:update']">
+            <el-button link type="warning" @click="handleAssignToDevice(row)" v-hasPermi="['itam:licenses:update']">
               分配设备
             </el-button>
             <el-button link type="primary" @click="handleUpdate(row)" v-hasPermi="['itam:licenses:update']">
@@ -222,7 +223,9 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button :loading="saveLoading" type="primary" @click="submitForm">{{ $t('common.submit') }} </el-button>
+          <el-button :loading="saveLoading" type="primary" @click="submitForm">
+            {{ saveLoading ? $t('common.saving') : $t('common.submit') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>

@@ -2,6 +2,7 @@ package com.ciyocloud.common.util;
 
 import cn.dev33.satoken.secure.SaSecureUtil;
 import cn.dev33.satoken.stp.StpUtil;
+import com.ciyocloud.common.config.SecurityProperties;
 import com.ciyocloud.common.entity.security.LoginUserEntity;
 import com.ciyocloud.common.exception.AuthorizationException;
 import org.springframework.http.HttpStatus;
@@ -13,11 +14,41 @@ import org.springframework.http.HttpStatus;
  */
 public class SecurityUtils {
 
-    /**
-     * AES 加密密钥（32位，256bit强度）
-     * 生产环境建议从配置文件读取
-     */
-    private static final String AES_KEY = "CiyoCloud@2024#IT&Asset!Secure";
+    private static final String DEFAULT_AES_KEY = "CiyoCloud@2024#IT&Asset!Secure";
+
+    private static SecurityProperties securityProperties;
+
+    private static SecurityProperties getSecurityProperties() {
+        if (securityProperties == null) {
+            try {
+                securityProperties = SpringContextUtils.getBean(SecurityProperties.class);
+            } catch (Exception e) {
+                // Spring 上下文不可用时返回 null，后续使用默认值兜底
+            }
+        }
+        return securityProperties;
+    }
+
+    private static String getAesKey() {
+        SecurityProperties props = getSecurityProperties();
+        if (props != null && props.getAesKey() != null && !props.getAesKey().isBlank()) {
+            return props.getAesKey();
+        }
+        return DEFAULT_AES_KEY;
+    }
+
+    private static boolean isMigrationMode() {
+        SecurityProperties props = getSecurityProperties();
+        return props != null && props.isMigrationMode();
+    }
+
+    private static String getAesKeyOld() {
+        SecurityProperties props = getSecurityProperties();
+        if (props != null && props.getAesKeyOld() != null && !props.getAesKeyOld().isBlank()) {
+            return props.getAesKeyOld();
+        }
+        return DEFAULT_AES_KEY;
+    }
 
     /**
      * 获取用户账户
@@ -84,7 +115,7 @@ public class SecurityUtils {
      * @return 加密字符串
      */
     public static String encryptPassword(String password) {
-        return SaSecureUtil.aesEncrypt(AES_KEY, password);
+        return SaSecureUtil.aesEncrypt(getAesKey(), password);
     }
 
 
@@ -97,11 +128,55 @@ public class SecurityUtils {
      */
     public static boolean matchesPassword(String rawPassword, String encodedPassword) {
         try {
-            String decryptPassword = SaSecureUtil.aesDecrypt(AES_KEY, encodedPassword);
-            return rawPassword.equals(decryptPassword);
+            String newEncrypt = SaSecureUtil.aesEncrypt(getAesKey(), rawPassword);
+            if (newEncrypt.equals(encodedPassword)) {
+                return true;
+            }
+            if (isMigrationMode()) {
+                String oldDecrypt = SaSecureUtil.aesDecrypt(getAesKeyOld(), encodedPassword);
+                if (rawPassword.equals(oldDecrypt)) {
+                    return true;
+                }
+            }
+            return false;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * 判断密码是否相同，并返回是否需要重新加密
+     * 用于登录成功后自动迁移密码到新密钥
+     *
+     * @param rawPassword     真实密码
+     * @param encodedPassword 加密后字符
+     * @return PasswordMatchResult 包含匹配结果和是否需要重新加密
+     */
+    public static PasswordMatchResult matchesPasswordWithReencrypt(String rawPassword, String encodedPassword) {
+        boolean matched = false;
+        boolean needsReencrypt = false;
+        try {
+            String newEncrypt = SaSecureUtil.aesEncrypt(getAesKey(), rawPassword);
+            if (newEncrypt.equals(encodedPassword)) {
+                matched = true;
+            }
+            else if (isMigrationMode()) {
+                String oldDecrypt = SaSecureUtil.aesDecrypt(getAesKeyOld(), encodedPassword);
+                if (rawPassword.equals(oldDecrypt)) {
+                    matched = true;
+                    needsReencrypt = true;
+                }
+            }
+        } catch (Exception e) {
+            matched = false;
+        }
+        return new PasswordMatchResult(matched, needsReencrypt);
+    }
+
+    /**
+     * 密码匹配结果
+     */
+    public record PasswordMatchResult(boolean matched, boolean needsReencrypt) {
     }
 
     /**
@@ -180,6 +255,9 @@ public class SecurityUtils {
     }
 
     public static void main(String[] args) {
+        SecurityProperties props = new SecurityProperties();
+        props.setAesKey("CiyoCloud@2024#IT&Asset!Secure");
+        securityProperties = props;
         System.out.println(encryptPassword("123456"));
     }
 }

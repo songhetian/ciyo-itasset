@@ -118,7 +118,9 @@
     <template #footer>
       <div class="dialog-footer">
         <ElButton @click="dialogVisible = false">{{ $t('system.userManagement.cancel') }}</ElButton>
-        <ElButton type="primary" @click="handleSubmit">{{ $t('system.userManagement.confirm') }}</ElButton>
+        <ElButton type="primary" :loading="submitLoading" @click="handleSubmit">
+          {{ submitLoading ? (dialogType === 'add' ? $t('common.adding') : $t('common.saving')) : $t('system.userManagement.confirm') }}
+        </ElButton>
       </div>
     </template>
   </ElDialog>
@@ -163,6 +165,9 @@
 
   // 表单实例
   const formRef = ref<FormInstance>()
+
+  // 提交loading状态
+  const submitLoading = ref(false)
 
   // 下拉选项
   const statusOptions = ref<DictDataEntity[]>([])
@@ -311,6 +316,7 @@
 
     await formRef.value.validate(async (valid) => {
       if (valid) {
+        submitLoading.value = true
         try {
           if (formData.id) {
             const submitData: any = { ...formData }
@@ -324,6 +330,8 @@
           emit('submit')
         } catch (error) {
           console.error('提交失败:', error)
+        } finally {
+          submitLoading.value = false
         }
       }
     })

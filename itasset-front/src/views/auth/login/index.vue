@@ -16,8 +16,14 @@
             <!-- Logo -->
             <div class="brand-logo">
               <div class="logo-pulse-ring ring-1"></div>
+              <div class="logo-pulse-ring ring-2"></div>
               <div class="logo-circle">
-                <span>ITAM</span>
+                <template v-if="systemInfo.logoImg">
+                  <img :src="systemInfo.logoImg" alt="logo" class="logo-image" />
+                </template>
+                <template v-else>
+                  <span>{{ shortName }}</span>
+                </template>
               </div>
             </div>
             <!-- 标题 -->
@@ -54,7 +60,13 @@
             <div class="form-group">
               <label class="form-label">{{ $t('login.label.username') }}</label>
               <ElFormItem prop="username">
-                <ElInput class="form-input" :placeholder="$t('login.placeholder.username')" v-model.trim="formData.username" />
+                <ElInput
+                  class="form-input"
+                  :placeholder="$t('login.placeholder.username')"
+                  v-model.trim="formData.username"
+                  autocomplete="username"
+                  spellcheck="false"
+                />
               </ElFormItem>
             </div>
 
@@ -66,7 +78,7 @@
                   :placeholder="$t('login.placeholder.password')"
                   v-model.trim="formData.password"
                   type="password"
-                  autocomplete="off"
+                  autocomplete="current-password"
                   show-password
                 />
               </ElFormItem>
@@ -210,6 +222,12 @@
   const systemStore = useSystemStore()
 
   const { systemInfo } = storeToRefs(systemStore)
+
+  const shortName = computed(() => {
+    const name = systemInfo.value.name || '雷犀IT资产'
+    if (name.length <= 4) return name
+    return name.charAt(0) + name.charAt(1)
+  })
 </script>
 
 <style lang="scss" scoped>
@@ -363,6 +381,12 @@
     color: #fff;
     background: rgba(255, 255, 255, 0.1);
     animation: breatheCenter 2s ease-in-out infinite;
+
+    .logo-image {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+    }
   }
 
   @keyframes breatheCenter {
@@ -404,7 +428,7 @@
       border-radius: 12px;
       color: #fff;
       opacity: 0;
-      transition: all 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.3s ease, opacity 0.3s ease;
       animation: slideInLeft 0.5s ease-out forwards;
       animation-delay: calc(0.3s + var(--index) * 0.1s);
 

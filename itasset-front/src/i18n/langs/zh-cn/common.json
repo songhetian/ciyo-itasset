@@ -41,5 +41,8 @@
   "exportConfirm": "是否确认导出所有数据项？",
   "enable": "启用",
   "disable": "停用",
-  "import": "导入"
+  "import": "导入",
+  "saving": "保存中…",
+  "adding": "新增中…",
+  "deleting": "删除中…"
 }

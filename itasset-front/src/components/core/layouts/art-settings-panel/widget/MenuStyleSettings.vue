@@ -9,7 +9,7 @@
           cursor: disabled ? 'no-drop' : 'pointer'
         }"
       >
-        <img :src="item.img" />
+        <img :src="item.img" width="100" height="80" alt="menu theme preview" />
       </div>
     </div>
   </div>

@@ -15,10 +15,17 @@
         </template>
       </el-input>
       <div class="icon-list">
-        <div v-for="(v, index) in tempIconList" :key="index" @click="selectedIcon(v)" class="icon-item">
-          <ArtSvgIcon :icon="v" class="icon-display" />
+        <button
+          v-for="(v, index) in tempIconList"
+          :key="index"
+          type="button"
+          @click="selectedIcon(v)"
+          class="icon-item"
+          :aria-label="v"
+        >
+          <ArtSvgIcon :icon="v" class="icon-display" aria-hidden="true" />
           <span class="icon-name">{{ v }}</span>
-        </div>
+        </button>
       </div>
     </div>
   </div>
@@ -82,11 +89,19 @@
           justify-content: center;
           cursor: pointer;
           padding: 8px;
+          border: none;
           border-radius: 4px;
-          transition: all 0.3s;
+          background: transparent;
+          transition: background-color 0.3s;
+          color: inherit;
 
           &:hover {
             background-color: var(--el-fill-color-light);
+          }
+
+          &:focus-visible {
+            outline: 2px solid var(--el-color-primary);
+            outline-offset: -2px;
           }
 
           .icon-display {

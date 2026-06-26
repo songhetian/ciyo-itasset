@@ -243,7 +243,7 @@
       text-align: center;
       cursor: pointer;
       user-select: none;
-      transition: all 0.3s;
+      transition: opacity 0.3s;
 
       &:hover {
         opacity: 0.8;

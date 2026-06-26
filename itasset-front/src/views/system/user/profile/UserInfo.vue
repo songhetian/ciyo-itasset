@@ -146,7 +146,7 @@
       font-weight: 600;
       border-radius: 10px;
       height: 44px;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
 
       &:hover {
         transform: translateY(-2px);
@@ -168,7 +168,7 @@
   :deep(.el-input__wrapper) {
     border-radius: 10px;
     box-shadow: 0 0 0 1px var(--el-border-color-lighter) inset;
-    transition: all 0.3s ease;
+    transition: box-shadow 0.3s ease;
 
     &.is-focus {
       box-shadow: 0 0 0 1px var(--el-color-primary) inset !important;

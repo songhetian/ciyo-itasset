@@ -29,6 +29,7 @@
               <el-button
                 :disabled="!selectedRows.length"
                 type="danger"
+                plain
                 v-ripple
                 icon="ele-Delete"
                 @click="handleDelete"
@@ -40,6 +41,7 @@
               <el-button
                 :disabled="!selectedRows.length"
                 type="danger"
+                plain
                 v-ripple
                 icon="ele-Close"
                 @click="handleScrap()"
@@ -114,7 +116,7 @@
             <el-button link type="primary" @click="handleUpdate(row)" v-hasPermi="['itam:device:update']">
               {{ $t('system.roleManagement.edit') }}
             </el-button>
-            <el-button link type="primary" @click="handleAssign(row)" v-hasPermi="['itam:device:update']"> 分配 </el-button>
+            <el-button link type="warning" @click="handleAssign(row)" v-hasPermi="['itam:device:update']"> 分配 </el-button>
 
             <el-dropdown trigger="click">
               <el-button link type="primary" style="margin-left: 12px">
@@ -181,7 +183,11 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="设备编号" prop="deviceNo">
-              <el-input v-model="form.deviceNo" placeholder="请输入设备编号" clearable />
+              <el-input v-model="form.deviceNo" placeholder="不填则保存时自动生成" clearable />
+              <div class="auto-gen-hint" v-if="!isEdit">
+                <el-icon><MagicStick /></el-icon>
+                <span>选择型号后，保存时将自动生成设备编号</span>
+              </div>
             </el-form-item>
           </el-col>
           <el-col :span="24">
@@ -274,7 +280,9 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button :loading="saveLoading" type="primary" @click="submitForm">{{ $t('common.submit') }} </el-button>
+          <el-button :loading="saveLoading" type="primary" @click="submitForm">
+            {{ saveLoading ? $t('common.saving') : $t('common.submit') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>
@@ -309,6 +317,7 @@
   import { getCategoriesTree, CategoriesEntity } from '@/api/itam/categories'
   import { AssetType } from '@/api/itam/enums'
   import { ElMessageBox } from 'element-plus'
+  import { MagicStick } from '@element-plus/icons-vue'
   import { useTable } from '@/hooks/core/useTable'
   import { MessageUtil } from '@/utils/messageUtil'
   import { download, downloadPdf, resetFormRef } from '@/utils/business'
@@ -745,5 +754,24 @@
 <style scoped lang="scss">
   .log-page {
     padding: 16px;
+  }
+
+  .auto-gen-hint {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--el-color-primary);
+    margin-top: 4px;
+    line-height: 1.4;
+
+    .el-icon {
+      font-size: 14px;
+    }
+  }
+
+  .auto-gen-btn {
+    padding: 0 8px;
+    height: 100%;
   }
 </style>

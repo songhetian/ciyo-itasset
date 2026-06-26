@@ -91,7 +91,7 @@
   import { useI18n } from 'vue-i18n'
   import { useTable } from '@/hooks/core/useTable'
   import { delMessage, listMessage, type MessageLog } from '@/api/system/message'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import { parseTime } from '@/utils/business'
   import LogSearch from './modules/log-search.vue'
 
@@ -174,13 +174,17 @@
   // Delete handling
   const handleDelete = (row?: any) => {
     const ids = row?.id || selectedRows.value.map((item) => item.id).join(',')
-    ElMessageBox.confirm(t('system.noticeLog.confirmDelete') + ids + t('system.noticeLog.dataItem'), t('common.warning'))
-      .then(() => delMessage(ids))
-      .then(() => {
-        refreshData()
-        MessageUtil.success(t('common.success'))
-      })
-      .catch(() => {})
+    const isBatch = !row?.id
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delMessage(ids)
+        await refreshData()
+      },
+      {
+        itemName: '消息',
+        count: isBatch ? selectedRows.value.length : undefined
+      }
+    )
   }
 
   // Details dialog handling

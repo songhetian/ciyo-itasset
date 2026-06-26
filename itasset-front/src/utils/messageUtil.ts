@@ -126,5 +126,61 @@ export const MessageBoxUtil = {
           opt.error()
         }
       })
+  },
+
+  async confirmDelete(
+    deleteAction: () => Promise<any>,
+    options?: {
+      title?: string
+      message?: string
+      itemName?: string
+      count?: number
+      onSuccess?: () => void
+    }
+  ) {
+    const {
+      title = '删除确认',
+      itemName = '数据',
+      count,
+      onSuccess
+    } = options || {}
+
+    let message = options?.message || ''
+    if (!message) {
+      if (count !== undefined && count > 0) {
+        message = `确定要删除选中的 <strong>${count}</strong> 条${itemName}吗？`
+      } else {
+        message = `确定要删除该${itemName}吗？`
+      }
+      message += '<br/><span style="color: #909399; font-size: 13px;">此操作无法撤销，请谨慎操作。</span>'
+    }
+
+    await ElMessageBox.confirm(message, title, {
+      confirmButtonText: '确认删除',
+      cancelButtonText: '取消',
+      type: 'warning',
+      dangerouslyUseHTMLString: true,
+      confirmButtonClass: 'el-button--danger',
+      beforeClose: async (action, instance, done) => {
+        if (action === 'confirm') {
+          instance.confirmButtonLoading = true
+          instance.confirmButtonText = '删除中...'
+
+          try {
+            await deleteAction()
+            done()
+            MessageUtil.success('删除成功')
+            onSuccess?.()
+          } catch (error) {
+            MessageUtil.error(MessageUtil.format(error))
+          } finally {
+            instance.confirmButtonLoading = false
+            instance.confirmButtonText = '确认删除'
+          }
+        } else {
+          done()
+        }
+      }
+    }).catch(() => {})
   }
 }

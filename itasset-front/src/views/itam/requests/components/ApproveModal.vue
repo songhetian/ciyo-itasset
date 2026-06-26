@@ -108,8 +108,12 @@
     <template #footer>
       <div class="flex justify-end gap-3">
         <el-button @click="visible = false">取消</el-button>
-        <el-button type="danger" @click="handleReject">驳回申请</el-button>
-        <el-button type="primary" :disabled="!selectedAssetId" :loading="submitting" @click="handleSubmit"> 确认分配 </el-button>
+        <el-button type="danger" :loading="rejectLoading" @click="handleReject">
+          {{ rejectLoading ? '驳回中…' : '驳回申请' }}
+        </el-button>
+        <el-button type="primary" :disabled="!selectedAssetId" :loading="submitting" @click="handleSubmit">
+          {{ submitting ? '分配中…' : '确认分配' }}
+        </el-button>
       </div>
     </template>
   </el-dialog>
@@ -132,6 +136,7 @@
 
   const note = ref('')
   const submitting = ref(false)
+  const rejectLoading = ref(false)
   const selectedAssetId = ref<number>()
 
   const loadingAssets = ref(false)
@@ -274,7 +279,7 @@
         reason = value
       }
 
-      submitting.value = true
+      rejectLoading.value = true
       await rejectRequest({
         id: requestData.value.id,
         reason
@@ -285,7 +290,7 @@
     } catch {
       // User cancelled or error
     } finally {
-      submitting.value = false
+      rejectLoading.value = false
     }
   }
 </script>

@@ -46,6 +46,7 @@
                 :disabled="!selectedRows.length"
                 v-hasPermi="['system:config:remove']"
                 type="danger"
+                plain
                 v-ripple
               >
                 {{ t('system.parameter.delete') }}
@@ -105,8 +106,8 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ t('common.cancel') }}</el-button>
-          <el-button type="primary" @click="submitForm">
-            {{ t('common.confirm') }}
+          <el-button type="primary" :loading="saveLoading" @click="submitForm">
+            {{ saveLoading ? t('common.saving') : t('common.confirm') }}
           </el-button>
         </div>
       </template>
@@ -121,7 +122,7 @@
   import { addConfig, delConfig, exportConfig, getConfig, listConfig, refreshCache, updateConfig } from '@/api/system/config'
   import { getDicts, DictDataEntity } from '@/api/system/dict/data'
   import { download, parseTime } from '@/utils/business'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import ConfigSearch from './modules/config-search.vue'
   import { i18n } from '@/i18n'
 
@@ -155,6 +156,7 @@
 
   // Export loading
   const exportLoading = ref(false)
+  const saveLoading = ref(false)
 
   // Dialog related
   const open = ref(false)
@@ -347,6 +349,7 @@
   const submitForm = () => {
     formRef.value?.validate(async (valid) => {
       if (valid) {
+        saveLoading.value = true
         try {
           if (form.id !== undefined) {
             await updateConfig(form)
@@ -359,6 +362,8 @@
           await refreshData()
         } catch (error) {
           console.error('提交失败:', error)
+        } finally {
+          saveLoading.value = false
         }
       }
     })
@@ -377,21 +382,17 @@
 
   // Delete config (batch or single)
   const handleDelete = (ids: any) => {
-    ElMessageBox.confirm(t('system.parameter.confirmDeleteParameter', { id: ids }), t('common.warning'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning'
-    })
-      .then(async () => {
-        try {
-          await delConfig(ids)
-          MessageUtil.success(t('system.parameter.deleteSuccess'))
-          await refreshData()
-        } catch (error) {
-          console.error('删除失败:', error)
-        }
-      })
-      .catch(() => {})
+    const isBatch = typeof ids === 'string' && ids.includes(',')
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delConfig(ids)
+        await refreshData()
+      },
+      {
+        itemName: '参数配置',
+        count: isBatch ? selectedRows.value.length : undefined
+      }
+    )
   }
 
   // Export

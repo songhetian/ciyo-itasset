@@ -232,7 +232,7 @@
   import FormTinymce from '@/components/business/tinymce/index.vue'
   import { customAlphabet } from 'nanoid'
   import { resetFormRef } from '@/utils/business'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import TemplateSearch from './modules/template-search.vue'
 
   const nanoid = customAlphabet('0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ', 6)
@@ -473,13 +473,17 @@
 
   const handleDelete = (row?: any) => {
     const idsToDelete = row?.id || selectedRows.value.map((item) => item.id).join(',')
-    ElMessageBox.confirm(t('system.noticeTemplate.isDelete'), t('common.warning'))
-      .then(() => delMsgTemplate(idsToDelete))
-      .then(() => {
-        refreshData()
-        MessageUtil.success(t('common.success'))
-      })
-      .catch(() => {})
+    const isBatch = !row?.id
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delMsgTemplate(idsToDelete)
+        await refreshData()
+      },
+      {
+        itemName: '消息模板',
+        count: isBatch ? selectedRows.value.length : undefined
+      }
+    )
   }
 
   const handleDesc = (content: string) => {

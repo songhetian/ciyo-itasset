@@ -21,7 +21,7 @@
     <div v-if="!isLock">
       <ElDialog v-model="visible" :width="370" :show-close="false" @open="handleDialogOpen">
         <div class="flex-c flex-col">
-          <img class="w-16 h-16 rounded-full" :src="userInfo.avatar" alt="用户头像" />
+          <img class="w-16 h-16 rounded-full" :src="getAvatar" alt="用户头像" />
           <div class="mt-7.5 mb-3.5 text-base font-medium">{{ userInfo.userName }}</div>
           <ElForm ref="formRef" :model="formData" :rules="rules" class="w-[90%]" @submit.prevent="handleLock">
             <ElFormItem prop="password">
@@ -53,7 +53,7 @@
     <!-- 解锁界面 -->
     <div v-else class="unlock-content">
       <div class="flex-c flex-col w-80">
-        <img class="w-16 h-16 mt-5 rounded-full" :src="userInfo.avatar" alt="用户头像" />
+        <img class="w-16 h-16 mt-5 rounded-full" :src="getAvatar" alt="用户头像" />
         <div class="mt-3 mb-3.5 text-base font-medium">
           {{ userInfo.userName }}
         </div>
@@ -106,7 +106,7 @@
 
   // Store
   const userStore = useUserStore()
-  const { info: userInfo, lockPassword, isLock } = storeToRefs(userStore)
+  const { info: userInfo, lockPassword, isLock, getAvatar } = storeToRefs(userStore)
 
   // 响应式数据
   const visible = ref<boolean>(false)

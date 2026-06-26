@@ -46,7 +46,7 @@
             <el-button link type="primary" @click="handleUpdate(row)" v-hasPermi="['system:dept:edit']">
               {{ $t('common.update') }}
             </el-button>
-            <el-button link type="primary" @click="handleAdd(row)" v-hasPermi="['system:dept:add']">
+            <el-button link type="warning" @click="handleAdd(row)" v-hasPermi="['system:dept:add']">
               {{ $t('common.add') }}
             </el-button>
             <el-button v-if="row.parentId != 0" link type="danger" @click="handleDelete(row)" v-hasPermi="['system:dept:remove']">
@@ -113,8 +113,8 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button type="primary" @click="submitForm">
-            {{ $t('common.confirm') }}
+          <el-button type="primary" :loading="saveLoading" @click="submitForm">
+            {{ saveLoading ? $t('common.saving') : $t('common.confirm') }}
           </el-button>
         </div>
       </template>
@@ -132,7 +132,7 @@
   import { getDicts } from '@/api/system/dict/data'
   import { parseTime, selectDictLabel, handleTree } from '@/utils/business'
   import type { FormInstance } from 'element-plus'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import { useI18n } from 'vue-i18n'
   import { useTableColumns } from '@/hooks/core/useTableColumns'
   import DeptSearch from './modules/dept-search.vue'
@@ -144,6 +144,7 @@
 
   // 状态和引用
   const loading = ref(true)
+  const saveLoading = ref(false)
   const showSearch = ref(true)
   const deptList = ref<DeptEntity[]>([])
   const deptOptions = ref<any[]>([])
@@ -448,37 +449,32 @@
   const submitForm = () => {
     formRef.value!.validate((valid: boolean) => {
       if (valid) {
-        if (form.id !== undefined) {
-          updateDept(form).then(() => {
+        saveLoading.value = true
+        const action = form.id !== undefined ? updateDept(form) : addDept(form)
+        action
+          .then(() => {
             MessageUtil.success(t('common.saveSuccess'))
             open.value = false
             getList()
           })
-        } else {
-          addDept(form).then(() => {
-            MessageUtil.success(t('common.saveSuccess'))
-            open.value = false
-            getList()
+          .finally(() => {
+            saveLoading.value = false
           })
-        }
       }
     })
   }
 
   const handleDelete = (row: any) => {
-    ElMessageBox.confirm(t('system.deptManagement.confirmDeleteData', { deptName: row.deptName }), t('common.warning'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning'
-    })
-      .then(() => {
-        return delDept(row.id)
-      })
-      .then(() => {
-        getList()
-        MessageUtil.success(t('common.saveSuccess'))
-      })
-      .catch(() => {})
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delDept(row.id)
+        await getList()
+      },
+      {
+        itemName: '部门',
+        message: `确定要删除部门 <strong>${row.deptName}</strong> 吗？<br/><span style="color: #909399; font-size: 13px;">此操作无法撤销，请谨慎操作。</span>`
+      }
+    )
   }
 </script>
 

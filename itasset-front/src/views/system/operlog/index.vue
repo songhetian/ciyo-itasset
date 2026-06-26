@@ -56,6 +56,19 @@
           @pagination:size-change="handleSizeChange"
           @pagination:current-change="handleCurrentChange"
         >
+          <template #businessType="{ row }">
+            <el-tag :type="businessTypeTagType(row.businessType)" size="small" effect="light">
+              {{ typeFormat(row) }}
+            </el-tag>
+          </template>
+          <template #status="{ row }">
+            <el-tag :type="row.status === 0 ? 'success' : 'danger'" size="small" effect="light">
+              {{ statusFormat(row) }}
+            </el-tag>
+          </template>
+          <template #costTime="{ row }">
+            <span class="cost-time">{{ row.costTime || 0 }} ms</span>
+          </template>
           <template #operation="{ row }">
             <div class="flex gap-2">
               <el-button link type="primary" @click="handleView(row)" v-hasPermi="['monitor:operlog:query']">
@@ -68,58 +81,74 @@
     </div>
 
     <!-- Operation log detail dialog -->
-    <el-dialog v-model="open" append-to-body :title="t('system.operlog.operationLogDetails')" width="50%">
-      <el-form :model="form" label-width="120px">
-        <el-row>
-          <el-col :span="12">
-            <el-form-item :label="t('system.operlog.operationModule') + ':'">
-              {{ form.title }} / {{ typeFormat(form) }}
-            </el-form-item>
-            <el-form-item :label="t('system.operlog.loginInfo') + ':'">
-              {{ form.operName }} / {{ form.operIp }} / {{ form.operLocation }}
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="t('system.operlog.requestAddress') + ':'">
-              {{ form.operUrl }}
-            </el-form-item>
-            <el-form-item :label="t('system.operlog.requestMethodLabel') + ':'">
-              {{ form.requestMethod }}
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item :label="t('system.operlog.operationMethod') + ':'">
-              {{ form.method }}
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item :label="t('system.operlog.requestParams') + ':'">
-              {{ form.operParam }}
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item :label="t('system.operlog.responseParams') + ':'">
-              {{ form.jsonResult }}
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="t('system.operlog.operationStatus') + ':'">
-              <div v-if="form.status === 0">{{ t('system.operlog.operationStatusNormal') }}</div>
-              <div v-else-if="form.status === 1">{{ t('system.operlog.operationStatusFailed') }}</div>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item :label="t('system.operlog.operationTimestamp') + ':'">
-              {{ parseTime(form.operTime) }}
-            </el-form-item>
-          </el-col>
-          <el-col :span="24">
-            <el-form-item v-if="form.status === 1" :label="t('system.operlog.errorMessage') + ':'">
-              {{ form.errorMsg }}
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
+    <el-dialog v-model="open" append-to-body :title="t('system.operlog.operationLogDetails')" width="60%" class="operlog-detail-dialog">
+      <div class="detail-section">
+        <div class="section-title">基本信息</div>
+        <el-descriptions :column="2" border size="default">
+          <el-descriptions-item :label="t('system.operlog.operationModule')">
+            <span class="module-name">{{ form.title }}</span>
+            <el-tag :type="businessTypeTagType(form.businessType)" size="small" style="margin-left: 8px;">
+              {{ typeFormat(form) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('system.operlog.operationStatus')">
+            <el-tag :type="form.status === 0 ? 'success' : 'danger'" size="small">
+              {{ form.status === 0 ? t('system.operlog.operationStatusNormal') : t('system.operlog.operationStatusFailed') }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('system.operlog.operator')">
+            {{ form.operName }}
+            <span v-if="form.deptName" class="dept-name">（{{ form.deptName }}）</span>
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('system.operlog.operationTimestamp')">
+            {{ parseTime(form.operTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('system.operlog.address')">
+            {{ form.operIp }}
+            <span v-if="form.operLocation" class="location">（{{ form.operLocation }}）</span>
+          </el-descriptions-item>
+          <el-descriptions-item label="耗时">
+            <span class="cost-time">{{ form.costTime || 0 }} ms</span>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+
+      <div class="detail-section">
+        <div class="section-title">请求信息</div>
+        <el-descriptions :column="1" border size="default">
+          <el-descriptions-item :label="t('system.operlog.requestAddress')">
+            <code class="url-text">{{ form.operUrl }}</code>
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('system.operlog.requestMethodLabel')">
+            <el-tag type="primary" size="small">{{ form.requestMethod }}</el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item :label="t('system.operlog.operationMethod')">
+            <code class="method-text">{{ form.method }}</code>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+
+      <div class="detail-section" v-if="form.operParam">
+        <div class="section-title">{{ t('system.operlog.requestParams') }}</div>
+        <div class="json-box">
+          <pre>{{ formatJson(form.operParam) }}</pre>
+        </div>
+      </div>
+
+      <div class="detail-section" v-if="form.jsonResult">
+        <div class="section-title">{{ t('system.operlog.responseParams') }}</div>
+        <div class="json-box">
+          <pre>{{ formatJson(form.jsonResult) }}</pre>
+        </div>
+      </div>
+
+      <div class="detail-section" v-if="form.status === 1 && form.errorMsg">
+        <div class="section-title error-title">{{ t('system.operlog.errorMessage') }}</div>
+        <div class="error-box">
+          <pre>{{ form.errorMsg }}</pre>
+        </div>
+      </div>
+
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="open = false">{{ t('system.operlog.close') }}</el-button>
@@ -197,23 +226,10 @@
       columnsFactory: () => [
         { type: 'selection' },
         {
-          prop: 'id',
-          label: t('system.operlog.logNumber'),
-          minWidth: 100
-        },
-        {
-          prop: 'title',
-          label: t('system.operlog.systemModule'),
-          minWidth: 100
-        },
-        {
-          prop: 'businessType',
-          label: t('system.operlog.operationType'),
-          formatter: (row: any) => typeFormat(row)
-        },
-        {
-          prop: 'requestMethod',
-          label: t('system.operlog.requestMethod')
+          prop: 'operTime',
+          label: t('system.operlog.date'),
+          minWidth: 170,
+          formatter: (row: any) => parseTime(row?.operTime)
         },
         {
           prop: 'operName',
@@ -222,33 +238,41 @@
           minWidth: 100
         },
         {
-          prop: 'operIp',
-          label: t('system.operlog.address'),
-          showOverflowTooltip: true,
-          minWidth: 180
+          prop: 'title',
+          label: t('system.operlog.systemModule'),
+          minWidth: 120,
+          showOverflowTooltip: true
         },
         {
-          prop: 'operLocation',
-          label: t('system.operlog.location'),
-          showOverflowTooltip: true
+          prop: 'businessType',
+          label: t('system.operlog.operationType'),
+          useSlot: true,
+          minWidth: 100
         },
         {
           prop: 'status',
           label: t('system.operlog.state'),
-          formatter: (row: any) => statusFormat(row)
+          useSlot: true,
+          minWidth: 90
         },
         {
-          prop: 'operTime',
-          label: t('system.operlog.date'),
-          minWidth: 180,
-          formatter: (row: any) => parseTime(row?.operTime)
+          prop: 'costTime',
+          label: '耗时',
+          useSlot: true,
+          minWidth: 90
+        },
+        {
+          prop: 'operIp',
+          label: t('system.operlog.address'),
+          showOverflowTooltip: true,
+          minWidth: 140
         },
         {
           prop: 'operation',
           label: t('system.operlog.operation'),
           useSlot: true,
           fixed: 'right',
-          minWidth: 120
+          minWidth: 100
         }
       ]
     }
@@ -277,6 +301,33 @@
   const typeFormat = (row: any) => {
     const dict = typeOptions.value.find((item) => item.dictValue === String(row.businessType))
     return dict?.dictLabel || t('system.operlog.other')
+  }
+
+  // Business type tag color
+  const businessTypeTagType = (businessType: number) => {
+    const typeMap: Record<number, string> = {
+      0: 'primary',   // 其它
+      1: 'success',   // 新增
+      2: 'warning',   // 修改
+      3: 'danger',    // 删除
+      4: 'info',      // 授权
+      5: '',          // 导出
+      6: '',          // 导入
+      7: 'danger',    // 强退
+      8: 'info',      // 生成代码
+      9: 'warning',   // 清空数据
+    }
+    return typeMap[businessType] || 'info'
+  }
+
+  // Format JSON string
+  const formatJson = (jsonStr: string) => {
+    if (!jsonStr) return ''
+    try {
+      return JSON.stringify(JSON.parse(jsonStr), null, 2)
+    } catch {
+      return jsonStr
+    }
   }
 
   // Search handling
@@ -379,5 +430,97 @@
 <style scoped lang="scss">
   .operlog-page {
     padding: 16px;
+  }
+
+  .cost-time {
+    color: var(--art-gray-500);
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+  }
+
+  .operlog-detail-dialog {
+    :deep(.el-dialog__body) {
+      padding-top: 10px;
+    }
+  }
+
+  .detail-section {
+    margin-bottom: 24px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--art-gray-800);
+    margin-bottom: 12px;
+    padding-left: 10px;
+    border-left: 3px solid var(--el-color-primary);
+    line-height: 1.4;
+  }
+
+  .error-title {
+    color: var(--el-color-danger);
+    border-left-color: var(--el-color-danger);
+  }
+
+  .module-name {
+    font-weight: 500;
+  }
+
+  .dept-name,
+  .location {
+    color: var(--art-gray-500);
+    font-size: 13px;
+  }
+
+  .url-text,
+  .method-text {
+    background: var(--art-gray-50);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+    word-break: break-all;
+  }
+
+  .json-box {
+    background: var(--art-gray-50);
+    border-radius: 8px;
+    padding: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid var(--art-gray-100);
+
+    pre {
+      margin: 0;
+      font-family: 'Courier New', Consolas, Monaco, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--art-gray-700);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+  }
+
+  .error-box {
+    background: #fef0f0;
+    border-radius: 8px;
+    padding: 16px;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #fbc4c4;
+
+    pre {
+      margin: 0;
+      font-family: 'Courier New', Consolas, Monaco, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--el-color-danger);
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
   }
 </style>

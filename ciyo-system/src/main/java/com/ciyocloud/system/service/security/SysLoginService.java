@@ -64,10 +64,17 @@ public class SysLoginService {
             throw new BaseException(StrUtil.format(MessageUtils.message("user.is.locked"), username));
         }
 
-        // 验证密码
-        if (!SecurityUtils.matchesPassword(password, user.getPassword())) {
+        // 验证密码（支持密钥迁移）
+        SecurityUtils.PasswordMatchResult result = SecurityUtils.matchesPasswordWithReencrypt(password, user.getPassword());
+        if (!result.matched()) {
             loginUtils.addLoginFailCount(username);
             throw new UserPasswordNotMatchException(MessageUtils.message("user.password.not.match"));
+        }
+
+        // 如果需要重新加密密码（密钥迁移模式）
+        if (result.needsReencrypt()) {
+            log.info("用户 {} 的密码需要迁移到新密钥", username);
+            userService.reencryptPassword(user.getId(), password);
         }
 
         // 创建登录用户信息

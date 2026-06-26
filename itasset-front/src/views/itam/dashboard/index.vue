@@ -392,7 +392,8 @@
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
       overflow: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
       &::before {
         content: '';
@@ -544,7 +545,7 @@
       border-radius: 16px;
       padding: 24px;
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s;
+      transition: box-shadow 0.3s ease;
 
       &:hover {
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);

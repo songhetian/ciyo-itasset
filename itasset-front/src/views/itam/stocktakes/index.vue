@@ -29,6 +29,7 @@
               <el-button
                 :disabled="!selectedRows.length"
                 type="danger"
+                plain
                 v-ripple
                 icon="ele-Delete"
                 @click="handleDelete"
@@ -147,7 +148,9 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button :loading="saveLoading" type="primary" @click="submitForm">{{ $t('common.submit') }} </el-button>
+          <el-button :loading="saveLoading" type="primary" @click="submitForm">
+            {{ saveLoading ? (form.id ? t('common.saving') : t('common.adding')) : $t('common.submit') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>

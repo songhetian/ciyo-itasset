@@ -51,7 +51,7 @@
                 <ElButton @click="showDialog('add')" icon="ele-Plus" type="primary" v-hasPermi="['system:user:add']" v-ripple>
                   {{ t('system.userManagement.addUser') }}
                 </ElButton>
-                <ElButton @click="handleImport" type="primary" icon="ele-Upload" v-hasPermi="['system:user:import']" v-ripple>
+                <ElButton @click="handleImport" icon="ele-Upload" v-hasPermi="['system:user:import']" v-ripple>
                   {{ t('common.import') }}
                 </ElButton>
                 <ElButton
@@ -69,6 +69,7 @@
                   :disabled="!selectedRows.length"
                   v-hasPermi="['system:user:remove']"
                   type="danger"
+                  plain
                   v-ripple
                 >
                   {{ t('common.delete') }}
@@ -101,7 +102,7 @@
                 </el-button>
                 <el-button
                   link
-                  type="primary"
+                  type="warning"
                   @click="handleResetPwd(row)"
                   v-hasPermi="['system:user:resetPwd']"
                   v-if="row.id !== 1"
@@ -181,7 +182,7 @@
   import { getToken } from '@/utils/auth'
   import { treeselect } from '@/api/system/dept'
   import { download, parseTime } from '@/utils/business'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import UserSearch from './modules/user-search.vue'
   import UserDialog from './modules/user-dialog.vue'
   import { DialogType } from '@/types'
@@ -434,21 +435,18 @@
 
   // Delete user (batch or single)
   const handleDelete = (userIds: any) => {
-    ElMessageBox.confirm(t('common.deleteConfirm'), t('common.warning'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning'
-    })
-      .then(async () => {
-        try {
-          await delUser(userIds)
-          MessageUtil.success('删除成功')
-          await refreshData()
-        } catch (error) {
-          console.error('删除失败:', error)
-        }
-      })
-      .catch(() => {})
+    const isBatch = typeof userIds === 'string' && userIds.includes(',')
+    const count = isBatch ? selectedRows.value.length : undefined
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delUser(userIds)
+        await refreshData()
+      },
+      {
+        itemName: '用户',
+        count
+      }
+    )
   }
 
   // Export

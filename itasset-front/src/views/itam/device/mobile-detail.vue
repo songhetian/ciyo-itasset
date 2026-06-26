@@ -687,7 +687,7 @@
         font-weight: 600;
         font-size: 15px;
         border: none;
-        transition: all 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28), box-shadow 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
 
         &.action-warning {
           background: linear-gradient(135deg, #ff9800 0%, #f44336 100%);
@@ -863,7 +863,7 @@
             font-weight: 600;
             letter-spacing: 1px;
             box-shadow: 0 4px 12px rgba(64, 158, 255, 0.25);
-            transition: all 0.2s;
+            transition: box-shadow 0.2s, transform 0.2s;
 
             /* Ensure icon and text are perfectly aligned */
             display: flex;
@@ -966,7 +966,7 @@
           border: 2px solid #f1f5f9;
           border-radius: 16px;
           cursor: pointer;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           overflow: hidden;
 
@@ -981,7 +981,7 @@
             margin-bottom: 12px;
             font-size: 24px;
             color: #94a3b8;
-            transition: all 0.3s;
+            transition: color 0.3s, background-color 0.3s, box-shadow 0.3s;
           }
 
           .status-label {

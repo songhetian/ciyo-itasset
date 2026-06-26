@@ -95,7 +95,9 @@
 
   .color-dot {
     box-shadow: 0 2px 4px rgb(0 0 0 / 15%);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     transition-delay: calc(var(--index) * 0.05s);
     transform: translateX(20px) scale(0.8);
   }

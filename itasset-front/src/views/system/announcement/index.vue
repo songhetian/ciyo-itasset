@@ -26,6 +26,7 @@
                 @click="() => handleDelete()"
                 icon="ele-Delete"
                 type="danger"
+                plain
                 :disabled="!selectedRows.length"
                 v-hasPermi="['sys:announcement:delete']"
                 v-ripple
@@ -66,7 +67,7 @@
               <el-button link type="danger" @click="handleDelete(row)" v-hasPermi="['sys:announcement:delete']">
                 {{ $t('common.delete') }}
               </el-button>
-              <el-button link type="success" @click="handleRelease(row)" v-hasPermi="['sys:announcement:release']">
+              <el-button link type="warning" @click="handleRelease(row)" v-hasPermi="['sys:announcement:release']">
                 {{ $t('system.announcement.publish') }}
               </el-button>
               <el-button link type="warning" @click="handleRevoke(row)" v-hasPermi="['sys:announcement:revoke']">
@@ -143,7 +144,9 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button type="primary" @click="submitForm">{{ $t('common.confirm') }}</el-button>
+          <el-button type="primary" :loading="saveLoading" @click="submitForm">
+            {{ saveLoading ? t('common.saving') : t('common.confirm') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>
@@ -173,7 +176,7 @@
   import UserChooseTable from '@/views/system/user/chooseTable.vue'
   import { parseTime } from '@/utils/business'
   import Tinymce from '@/components/business/tinymce/index.vue'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import AnnouncementSearch from './modules/announcement-search.vue'
 
   // i18n support
@@ -183,6 +186,7 @@
   const title = ref<string>('')
   const open = ref<boolean>(false)
   const showSearch = ref<boolean>(true)
+  const saveLoading = ref(false)
 
   // Selected rows
   const selectedRows = ref<AnnouncementItem[]>([])
@@ -373,6 +377,7 @@
 
     formRef.value.validate(async (valid: boolean) => {
       if (valid) {
+        saveLoading.value = true
         try {
           if (form.userIdList.length > 0) {
             form.userIds = form.userIdList.join(',')
@@ -391,6 +396,8 @@
           refreshData()
         } catch (error) {
           console.error('提交表单失败:', error)
+        } finally {
+          saveLoading.value = false
         }
       }
     })
@@ -398,25 +405,17 @@
 
   const handleDelete = async (row?: AnnouncementItem) => {
     const deleteIds = row?.id || selectedRows.value.map((item) => item.id)
-    try {
-      await ElMessageBox.confirm(
-        t('system.announcement.confirmDelete') + '"' + deleteIds + '"' + t('system.announcement.dataItem') + '?',
-        t('common.warning'),
-        {
-          confirmButtonText: t('common.confirm'),
-          cancelButtonText: t('common.cancel'),
-          type: 'warning'
-        }
-      )
-
-      await delAnnouncement(deleteIds)
-      refreshData()
-      MessageUtil.success(t('system.announcement.deleteSuccess'))
-    } catch (error) {
-      if (error !== 'cancel') {
-        console.error('删除公告失败:', error)
+    const isBatch = !row?.id
+    await MessageBoxUtil.confirmDelete(
+      async () => {
+        await delAnnouncement(deleteIds)
+        await refreshData()
+      },
+      {
+        itemName: '公告',
+        count: isBatch ? selectedRows.value.length : undefined
       }
-    }
+    )
   }
 
   // User selection

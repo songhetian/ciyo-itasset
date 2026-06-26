@@ -21,6 +21,9 @@
           <div class="preview-container">
             <div class="avatar-upload-preview">
               <img v-if="previewImg" :src="previewImg" />
+              <div v-else class="avatar-preview-placeholder">
+                <img :src="defaultAvatar" alt="默认头像" />
+              </div>
             </div>
           </div>
         </el-col>
@@ -67,6 +70,7 @@
   import { getCurrentInstance, reactive, ref, computed } from 'vue'
   import { i18n } from '@/i18n'
   import { MessageUtil } from '@/utils/messageUtil'
+  import defaultAvatar from '@/assets/images/svg/default-avatar.svg'
 
   const userStore = useUserStore()
   const { proxy } = getCurrentInstance()
@@ -76,10 +80,9 @@
   const title = ref(i18n.global.t('system.userAvatar.modify'))
   const previewImg = ref('')
 
-  // 获取头像 URL
   const avatarUrl = computed(() => {
     const avatar = userStore.getUserInfo.avatar
-    return avatar
+    return avatar && avatar.trim() !== '' ? avatar : defaultAvatar
   })
 
   //图片裁剪数据
@@ -199,7 +202,7 @@
     width: 100px;
     height: 100px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     border-radius: 50%;
     overflow: hidden;
 
@@ -209,7 +212,7 @@
       inset: 0;
       background: rgba(0, 0, 0, 0);
       z-index: 1;
-      transition: all 0.3s ease;
+      transition: background-color 0.3s ease;
     }
 
     &::after {
@@ -223,7 +226,7 @@
       font-size: 24px;
       opacity: 0;
       z-index: 2;
-      transition: all 0.3s ease;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
     &:hover {
@@ -275,5 +278,20 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+  }
+
+  .avatar-preview-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+
+    img {
+      width: 70%;
+      height: 70%;
+      object-fit: contain;
+    }
   }
 </style>

@@ -20,6 +20,7 @@
               @click="handleDelete()"
               icon="ele-Delete"
               type="danger"
+              plain
               :disabled="multiple"
               v-hasPermi="['system:dict:remove']"
             >
@@ -104,8 +105,8 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button type="primary" @click="submitForm">
-            {{ $t('common.confirm') }}
+          <el-button type="primary" :loading="saveLoading" @click="submitForm">
+            {{ saveLoading ? $t('common.saving') : $t('common.confirm') }}
           </el-button>
         </div>
       </template>
@@ -127,7 +128,7 @@
   import { addType, delType, exportType, getType, listType, refreshCache, updateType } from '@/api/system/dict/type'
   import { getDicts } from '@/api/system/dict/data'
   import type { FormInstance } from 'element-plus'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import { useI18n } from 'vue-i18n'
   import { useTableColumns } from '@/hooks/core/useTableColumns'
   import { parseTime, addDateRange } from '@/utils/business'
@@ -140,6 +141,7 @@
 
   // 状态和引用
   const loading = ref(true)
+  const saveLoading = ref(false)
   const exportLoading = ref(false)
   const showSearch = ref(true)
   const typeList = ref<any[]>([])
@@ -397,19 +399,17 @@
   const submitForm = () => {
     formRef.value!.validate((valid: boolean) => {
       if (valid) {
-        if (form.id !== undefined) {
-          updateType(form).then(() => {
-            MessageUtil.success(t('common.updateSuccess'))
+        saveLoading.value = true
+        const action = form.id !== undefined ? updateType(form) : addType(form)
+        action
+          .then(() => {
+            MessageUtil.success(form.id !== undefined ? t('common.updateSuccess') : t('common.addSuccess'))
             open.value = false
             getList()
           })
-        } else {
-          addType(form).then(() => {
-            MessageUtil.success(t('common.addSuccess'))
-            open.value = false
-            getList()
+          .finally(() => {
+            saveLoading.value = false
           })
-        }
       }
     })
   }
@@ -417,23 +417,17 @@
   /** 删除按钮操作 */
   const handleDelete = (row?: any) => {
     const deleteIds = row?.id || ids.value.join(',')
-    ElMessageBox.confirm(
-      t('system.dictionary.confirmDeleteDictionary') + '"' + deleteIds + '"' + t('system.dictionary.dataItem'),
-      t('system.dictionary.warning'),
+    const isBatch = !row?.id
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delType(deleteIds)
+        await getList()
+      },
       {
-        confirmButtonText: t('common.confirm'),
-        cancelButtonText: t('common.cancel'),
-        type: 'warning'
+        itemName: '字典',
+        count: isBatch ? ids.value.length : undefined
       }
     )
-      .then(() => {
-        return delType(deleteIds)
-      })
-      .then(() => {
-        getList()
-        MessageUtil.success(t('system.dictionary.deleteSuccess'))
-      })
-      .catch(() => {})
   }
 
   /** 导出按钮操作 */

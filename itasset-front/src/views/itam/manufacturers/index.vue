@@ -28,6 +28,7 @@
               </el-button>
               <el-button
                 type="danger"
+                plain
                 v-ripple
                 icon="ele-Delete"
                 :disabled="!selectedRows.length"
@@ -45,7 +46,7 @@
                 @success="refreshData"
               >
                 <template #trigger>
-                  <el-button type="success" icon="ele-Upload" v-ripple> 导入 </el-button>
+                  <el-button icon="ele-Upload" v-ripple> 导入 </el-button>
                 </template>
               </ExcelImport>
 
@@ -142,7 +143,9 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">取消</el-button>
-          <el-button :loading="saveLoading" type="primary" @click="submitForm">提交</el-button>
+          <el-button :loading="saveLoading" type="primary" @click="submitForm">
+            {{ saveLoading ? $t('common.saving') : '提交' }}
+          </el-button>
         </div>
       </template>
     </el-dialog>
@@ -162,7 +165,7 @@
   } from '@/api/itam/manufacturers'
   import { ElMessageBox } from 'element-plus'
   import { useTable } from '@/hooks/core/useTable'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import { download, resetFormRef } from '@/utils/business'
   import ImageUpload from '@/components/business/image-upload/index.vue'
   import ExcelImport from '@/components/business/excel-import/index.vue'
@@ -344,13 +347,17 @@
 
   const handleDelete = (row?: any) => {
     const ids = row?.id || selectedRows.value.map((item) => item.id).join(',')
-    ElMessageBox.confirm('是否确认删除编号为' + ids + '的数据项?', '警告')
-      .then(() => delManufacturers(ids))
-      .then(() => {
-        refreshData()
-        MessageUtil.success('删除成功')
-      })
-      .catch(() => {})
+    const isBatch = !row?.id
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delManufacturers(ids)
+        await refreshData()
+      },
+      {
+        itemName: '厂商',
+        count: isBatch ? selectedRows.value.length : undefined
+      }
+    )
   }
 
   // 取消按钮

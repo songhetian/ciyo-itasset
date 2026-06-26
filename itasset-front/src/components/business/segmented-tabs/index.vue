@@ -1,33 +1,31 @@
 <template>
   <div class="art-segmented-tabs-container">
-    <!-- Tab 头部容器 -->
-    <div class="art-segmented-tabs relative flex bg-g-100 dark:bg-g-900 p-1 rounded-3 w-full">
-      <!-- 滑动的背景块 -->
-      <div
-        class="tab-glider absolute top-1 bottom-1 bg-white dark:bg-g-700 rounded-2 shadow-sm transition-all duration-300 ease-spring"
-        :style="gliderStyle"
-      ></div>
-
+    <div class="art-segmented-tabs" ref="tabsRef">
       <div
         v-for="item in options"
         :key="item.value"
         :ref="(el) => setItemRef(el as HTMLElement, item.value)"
-        class="tab-item relative z-1 flex-1 flex-cc c-p px-3 py-1 rounded-2 text-3.5 select-none transition-colors duration-200"
-        :class="[modelValue === item.value ? 'active-tab' : 'text-g-900 hover:text-g-900 dark:text-g-400 dark:hover:text-g-200']"
+        class="tab-item"
+        :class="{ 'is-active': modelValue === item.value }"
         @click="handleToggle(item.value)"
       >
-        <el-icon v-if="item.icon" class="mr-1 text-4 font-bold">
-          <ArtSvgIcon v-if="typeof item.icon === 'string'" :icon="item.icon" />
-          <component v-else :is="item.icon" />
-        </el-icon>
-        {{ item.label }}
+        <div class="tab-content">
+          <el-icon v-if="item.icon" class="tab-icon">
+            <ArtSvgIcon v-if="typeof item.icon === 'string'" :icon="item.icon" />
+            <component v-else :is="item.icon" />
+          </el-icon>
+          <span class="tab-label">{{ item.label }}</span>
+        </div>
+        <div class="tab-indicator" :class="{ 'is-active': modelValue === item.value }"></div>
+      </div>
+      <div class="tabs-track">
+        <div class="track-glider" :style="gliderStyle"></div>
       </div>
     </div>
 
-    <!-- 内容区域：自动匹配插槽 -->
-    <div class="art-segmented-content mt-2 relative overflow-hidden">
+    <div class="art-segmented-content">
       <template v-for="item in options" :key="item.value">
-        <Transition name="slide-fade">
+        <Transition name="content-slide">
           <div v-if="$slots[item.value]" v-show="modelValue === item.value">
             <slot :name="item.value" :active="modelValue === item.value"></slot>
           </div>
@@ -45,23 +43,21 @@
 
   interface TabOption {
     label: string
-    value: string // 增强：插槽名通常为字符串
+    value: string
     icon?: string | Component
   }
 
   interface Props {
-    /** 选中的值 */
     modelValue: string
-    /** 选项列表 */
     options: TabOption[]
   }
 
   const props = defineProps<Props>()
   const emit = defineEmits(['update:modelValue', 'change'])
 
-  // 提供给 hook 使用
   provide('segmented-tabs-active', toRef(props, 'modelValue'))
 
+  const tabsRef = ref<HTMLElement>()
   const itemRefs = ref<Map<string, HTMLElement>>(new Map())
   const gliderStyle = reactive({
     width: '0px',
@@ -78,8 +74,9 @@
     const activeEl = itemRefs.value.get(props.modelValue)
     if (activeEl) {
       const { offsetLeft, offsetWidth } = activeEl
-      gliderStyle.left = `${offsetLeft}px`
-      gliderStyle.width = `${offsetWidth}px`
+      const labelWidth = Math.min(offsetWidth * 0.6, 60)
+      gliderStyle.left = `${offsetLeft + (offsetWidth - labelWidth) / 2}px`
+      gliderStyle.width = `${labelWidth}px`
     }
   }
 
@@ -97,10 +94,7 @@
   )
 
   onMounted(() => {
-    // 稍微延迟以确保布局完成
     setTimeout(updateGlider, 100)
-
-    // 监听窗口大小变化以重新计算位置
     window.addEventListener('resize', updateGlider)
   })
 
@@ -111,64 +105,264 @@
 
 <style scoped lang="scss">
   .art-segmented-tabs {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 4px;
+    position: relative;
+    min-height: 48px;
+    border-bottom: 1px solid var(--art-gray-200);
+
+    :global(.dark) &,
+    [data-theme='dark'] & {
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .tabs-track {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    pointer-events: none;
+  }
+
+  .track-glider {
+    position: absolute;
+    bottom: 0;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      var(--el-color-primary) 0%,
+      color-mix(in srgb, var(--el-color-primary) 70%, #fff) 100%
+    );
+    border-radius: 2px 2px 0 0;
+    transition:
+      left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+      width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 -2px 8px color-mix(in srgb, var(--el-color-primary) 30%, transparent);
+  }
+
+  .tab-item {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 16px;
+    height: 48px;
+    cursor: pointer;
     user-select: none;
-    border: 1px solid var(--art-gray-200);
+    transition: background-color 0.2s ease;
 
-    .active-tab {
-      color: var(--theme-color) !important;
+    &::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+      bottom: 8px;
+      left: 4px;
+      right: 4px;
+      border-radius: 8px;
+      background: transparent;
+      transition: background-color 0.2s ease;
+    }
+
+    &:not(.is-active):hover {
+      &::before {
+        background: var(--art-gray-50);
+      }
+
+      .tab-content {
+        transform: translateY(-1px);
+      }
+
+      .tab-label {
+        color: var(--art-gray-800);
+      }
+
+      .tab-icon {
+        color: var(--art-gray-600);
+      }
+    }
+
+    :global(.dark) &,
+    [data-theme='dark'] & {
+      &:not(.is-active):hover {
+        &::before {
+          background: rgba(255, 255, 255, 0.04);
+        }
+
+        .tab-label {
+          color: var(--art-gray-200);
+        }
+
+        .tab-icon {
+          color: var(--art-gray-400);
+        }
+      }
+    }
+
+    &.is-active {
+      .tab-content {
+        transform: translateY(-1px);
+      }
+
+      .tab-label {
+        color: var(--el-color-primary);
+        font-weight: 600;
+      }
+
+      .tab-icon {
+        color: var(--el-color-primary);
+      }
+    }
+
+    &:active .tab-content {
+      transform: translateY(0);
     }
   }
 
-  [data-theme='dark'] {
-    .art-segmented-tabs {
-      border-color: var(--art-gray-800);
+  .tab-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .tab-icon {
+    font-size: 18px;
+    color: var(--art-gray-500);
+    transition: color 0.2s ease;
+
+    :global(.dark) &,
+    [data-theme='dark'] & {
+      color: var(--art-gray-400);
     }
   }
 
-  .ease-spring {
-    transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  .tab-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--art-gray-600);
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+    transition: color 0.2s ease, font-weight 0.15s ease;
+
+    :global(.dark) &,
+    [data-theme='dark'] & {
+      color: var(--art-gray-400);
+    }
   }
 
-  /* 内容切换动画 */
-  .slide-fade-enter-active,
-  .slide-fade-leave-active {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  .tab-indicator {
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--el-color-primary);
+    border-radius: 2px 2px 0 0;
+    transform: translateX(-50%);
+    transition: width 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+
+    &.is-active {
+      width: 40%;
+      opacity: 1;
+    }
   }
 
-  .slide-fade-leave-active {
+  .art-segmented-content {
+    margin-top: 24px;
+    position: relative;
+    min-height: 200px;
+  }
+
+  .content-slide-enter-active {
+    transition: opacity 0.35s ease-out, transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .content-slide-leave-active {
+    transition: opacity 0.2s ease-in, transform 0.2s ease-in;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     z-index: 0;
+    pointer-events: none;
   }
 
-  .slide-fade-enter-from {
+  .content-slide-enter-from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateY(12px);
   }
 
-  .slide-fade-leave-to {
+  .content-slide-leave-to {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateY(-8px);
   }
 
-  /* 移动端适配 */
   @media (max-width: 768px) {
     .art-segmented-tabs {
-      padding: 2px;
+      min-height: 44px;
+      padding: 0 2px;
+    }
 
-      .tab-item {
-        padding: 10px 12px !important;
-        font-size: 0 !important; /* 隐藏文字 */
-        flex: 1; /* 平分空间 */
-        justify-content: center;
+    .tab-item {
+      padding: 0 8px;
+      height: 44px;
 
-        .el-icon {
-          margin-right: 0 !important;
-          font-size: 20px !important;
-        }
+      &::before {
+        top: 6px;
+        bottom: 6px;
+        left: 2px;
+        right: 2px;
+        border-radius: 6px;
       }
+    }
+
+    .tab-label {
+      font-size: 13px;
+    }
+
+    .tab-icon {
+      font-size: 18px;
+    }
+
+    .tab-content {
+      gap: 6px;
+    }
+
+    .art-segmented-content {
+      margin-top: 16px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .art-segmented-tabs {
+      min-height: 40px;
+    }
+
+    .tab-item {
+      height: 40px;
+      padding: 0 6px;
+    }
+
+    .tab-label {
+      font-size: 0;
+    }
+
+    .tab-icon {
+      font-size: 20px;
+    }
+
+    .tab-content {
+      gap: 0;
     }
 
     .art-segmented-content {
@@ -176,32 +370,18 @@
     }
   }
 
-  @media (max-width: 640px) {
-    .art-segmented-tabs {
-      .tab-item {
-        padding: 8px 10px !important;
-
-        .el-icon {
-          font-size: 18px !important;
-        }
-      }
-    }
-
-    .art-segmented-content {
-      margin-top: 10px;
-    }
-  }
-
-  /* 超小屏幕优化 */
   @media (max-width: 480px) {
     .art-segmented-tabs {
-      .tab-item {
-        padding: 8px 8px !important;
+      min-height: 36px;
+    }
 
-        .el-icon {
-          font-size: 16px !important;
-        }
-      }
+    .tab-item {
+      height: 36px;
+      padding: 0 4px;
+    }
+
+    .tab-icon {
+      font-size: 18px;
     }
   }
 </style>

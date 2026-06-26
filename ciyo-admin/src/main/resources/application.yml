@@ -4,7 +4,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: prod
+    active: dev
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     #设置空如何序列化
@@ -19,8 +19,8 @@ spring:
       fail_on_unknown_properties: false
   servlet:
     multipart:
-      max-file-size: 10000MB
-      max-request-size: 10000MB
+      max-file-size: 50MB
+      max-request-size: 50MB
   thymeleaf:
     prefix: classpath:/templates/
     suffix: .html
@@ -62,9 +62,12 @@ sa-token:
   # token 名称（同时也是 cookie 名称）
   token-name: Authorization
   # token 有效期（单位：秒）默认120分钟，-1 代表永久有效
-  timeout: 7200
-  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
-  active-timeout: -1
+  # 生产环境建议设置为 1800（30分钟）
+  timeout: 1800
+  # token 最低活跃频率（单位：秒）
+  # 如果 token 超过此时间没有访问系统就会被冻结
+  # 设置为 600（10分钟）强制用户定期重新认证
+  active-timeout: 600
   # 是否允许同一账号多地同时登录（为 true 时允许一起登录, 为 false 时新登录挤掉旧登录）
   is-concurrent: true
   # 在多人登录同一账号时，是否共用一个 token（为 true 时所有登录共用一个 token, 为 false 时每次登录新建一个 token）
@@ -78,6 +81,9 @@ sa-token:
 platform:
   gen: #代码生成是否启用
     enabled: true
+  form-file: #表单文件上传配置
+    path-mode: relative #路径模式：absolute绝对路径 / relative相对路径
+    relative-path-prefix: /u/ #相对路径前缀
   # 后端 API 统一前缀
   # 为什么不使用 server.servlet.context-path？
   # 因为 context-path 会全局修改所有路径（包括静态资源、Swagger等），导致前端 index.html 也会被挂载到 /api 下，
@@ -120,6 +126,19 @@ xss:
     - /sys/announce
   # 匹配链接
   url-patterns: /system/*,/monitor/*,/tool/*,/form/*,/user/form/*
+
+# 安全配置
+ciyo:
+  security:
+    # AES 加密密钥
+    # 生产环境必须通过环境变量 CIYO_SECURITY_AES_KEY 设置
+    # 开发环境使用默认值（仅用于本地开发）
+    # 生产环境部署时务必设置环境变量或使用配置中心
+    aes-key: ${CIYO_SECURITY_AES_KEY:CiyoCloud@2024#IT&Asset!Secure}
+    # 旧 AES 加密密钥（用于密码迁移）
+    # 当更换密钥后，设置此项可以让旧密码的用户自动迁移到新密钥
+    # 格式: ${CIYO_SECURITY_AES_KEY_OLD:}
+    aes-key-old: ${CIYO_SECURITY_AES_KEY_OLD:}
 
 
 # 密码加密配置

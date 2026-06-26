@@ -1,5 +1,5 @@
 <template>
-  <i v-if="icon" :class="['art-svg-icon inline-block', unoIconClass]" v-bind="$attrs" />
+  <i v-if="icon" :class="['art-svg-icon inline-block', unoIconClass]" v-bind="$attrs" aria-hidden="true" />
 </template>
 
 <script setup lang="ts">

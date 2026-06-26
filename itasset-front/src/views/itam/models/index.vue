@@ -29,6 +29,7 @@
               <el-button
                 :disabled="!selectedRows.length"
                 type="danger"
+                plain
                 v-ripple
                 icon="ele-Delete"
                 @click="handleDelete"
@@ -45,7 +46,7 @@
                 @success="refreshData"
               >
                 <template #trigger>
-                  <el-button type="success" icon="ele-Upload" v-ripple> 导入 </el-button>
+                  <el-button icon="ele-Upload" v-ripple> 导入 </el-button>
                 </template>
               </ExcelImport>
 
@@ -118,7 +119,9 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button :loading="saveLoading" type="primary" @click="submitForm">{{ $t('common.submit') }} </el-button>
+          <el-button :loading="saveLoading" type="primary" @click="submitForm">
+            {{ saveLoading ? $t('common.saving') : $t('common.submit') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>

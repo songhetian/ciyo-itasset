@@ -29,6 +29,7 @@
               <el-button
                 :disabled="!selectedRows.length"
                 type="danger"
+                plain
                 v-ripple
                 icon="ele-Delete"
                 @click="handleDelete"
@@ -45,7 +46,7 @@
                 @success="refreshData"
               >
                 <template #trigger>
-                  <el-button type="success" icon="ele-Upload" v-ripple> 导入 </el-button>
+                  <el-button icon="ele-Upload" v-ripple> 导入 </el-button>
                 </template>
               </ExcelImport>
 
@@ -68,7 +69,7 @@
           @pagination:current-change="handleCurrentChange"
         >
           <template #operation="{ row }">
-            <el-button link type="primary" @click="handleCollect(row)" v-hasPermi="['itam:consumables:update']"> 领取 </el-button>
+            <el-button link type="warning" @click="handleCollect(row)" v-hasPermi="['itam:consumables:update']"> 领取 </el-button>
             <el-button link type="success" @click="handleStockIn(row)" v-hasPermi="['itam:consumables:update']"> 入库 </el-button>
             <el-button link type="primary" @click="handleUpdate(row)" v-hasPermi="['itam:consumables:update']">
               {{ $t('system.roleManagement.edit') }}
@@ -105,7 +106,11 @@
           </el-select>
         </el-form-item>
         <el-form-item label="物品编号/型号" prop="itemNo">
-          <el-input v-model="form.itemNo" placeholder="请输入物品编号/型号" clearable />
+          <el-input v-model="form.itemNo" placeholder="不填则保存时自动生成" clearable />
+          <div class="auto-gen-hint" v-if="!isEdit">
+            <el-icon><MagicStick /></el-icon>
+            <span>选择分类后，保存时将自动生成物品编号</span>
+          </div>
         </el-form-item>
         <el-form-item label="采购单号" prop="orderNumber">
           <el-input v-model="form.orderNumber" placeholder="请输入采购单号" clearable />
@@ -159,7 +164,9 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ $t('common.cancel') }}</el-button>
-          <el-button :loading="saveLoading" type="primary" @click="submitForm">{{ $t('common.submit') }} </el-button>
+          <el-button :loading="saveLoading" type="primary" @click="submitForm">
+            {{ saveLoading ? $t('common.saving') : $t('common.submit') }}
+          </el-button>
         </div>
       </template>
     </el-dialog>
@@ -257,6 +264,7 @@
   import { listManufacturers, ManufacturersEntity } from '@/api/itam/manufacturers'
   import { AssetType } from '@/api/itam/enums'
   import { ElMessageBox } from 'element-plus'
+  import { MagicStick } from '@element-plus/icons-vue'
   import { useTable } from '@/hooks/core/useTable'
   import { MessageUtil } from '@/utils/messageUtil'
   import { download, resetFormRef } from '@/utils/business'
@@ -642,4 +650,18 @@
   }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+  .auto-gen-hint {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: var(--el-color-primary);
+    margin-top: 4px;
+    line-height: 1.4;
+
+    .el-icon {
+      font-size: 14px;
+    }
+  }
+</style>

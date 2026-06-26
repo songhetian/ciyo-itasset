@@ -210,4 +210,13 @@ public interface SysUserService extends BaseService<SysUserEntity> {
      * @return 岗位ID列表
      */
     List<Long> getPostIdListByUserId(Long userId);
+
+    /**
+     * 重新加密用户密码（用于密钥迁移）
+     *
+     * @param userId      用户ID
+     * @param rawPassword 明文密码
+     * @return 是否成功
+     */
+    boolean reencryptPassword(Long userId, String rawPassword);
 }

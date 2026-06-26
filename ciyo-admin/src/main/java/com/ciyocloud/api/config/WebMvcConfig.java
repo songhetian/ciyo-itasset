@@ -47,13 +47,23 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     /**
      * 跨域配置
+     * 生产环境应配置具体的允许来源，避免使用通配符
      */
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        // SpringBoot2.4.0 [allowedOriginPatterns]代替[allowedOrigins]
-        config.setAllowedOriginPatterns(Collections.singletonList("*"));
+        // 生产环境应配置具体的允许来源，例如:
+        // config.setAllowedOriginPatterns(Collections.singletonList("https://your-domain.com"));
+        // 开发环境使用 * 允许所有来源
+        // 生产环境部署时务必修改为具体域名
+        String allowedOrigins = System.getenv("CORS_ALLOWED_ORIGINS");
+        if (allowedOrigins != null && !allowedOrigins.isBlank()) {
+            config.setAllowedOriginPatterns(Collections.singletonList(allowedOrigins.trim()));
+        } else {
+            // 开发环境允许所有来源
+            config.setAllowedOriginPatterns(Collections.singletonList("*"));
+        }
         config.setAllowCredentials(true);
         // 设置访问源请求头
         config.addAllowedHeader(CorsConfiguration.ALL);

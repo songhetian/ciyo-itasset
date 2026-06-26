@@ -12,17 +12,43 @@ spring:
       idle-timeout: 30000
       pool-name: DatebookHikariCP
       max-lifetime: 1800000
+  # =============================================
+  # Redis 配置 - 使用 Lettuce 连接池
+  # =============================================
   data:
     redis:
       database: 0
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
-      timeout: 6000ms
       host: ${REDIS_HOST:redis}
+      # 连接超时配置
+      timeout: 3000ms
+      # Lettuce 连接池配置
+      lettuce:
+        pool:
+          # 最大连接数
+          max-active: 16
+          # 最大空闲连接
+          max-idle: 8
+          # 最小空闲连接
+          min-idle: 4
+          # 最大等待时间（毫秒）
+          max-wait: 3000ms
+        # 关闭超时时间
+        shutdown-timeout: 100ms
 
+# 安全配置
+ciyo:
+  security:
+    # AES 加密密钥（必须通过环境变量设置，生产环境禁止使用默认值）
+    # 使用命令生成: openssl rand -base64 32
+    aes-key: ${CIYO_SECURITY_AES_KEY:}
+
+# 日志配置
 logging:
   level:
-    com.ciyocloud: debug
+    # 生产环境使用 info 级别，避免 debug 日志泄露敏感信息
+    com.ciyocloud: info
   config: classpath:logback-spring.xml
 
 # 密码加密配置

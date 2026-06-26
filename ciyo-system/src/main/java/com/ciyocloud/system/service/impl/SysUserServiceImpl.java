@@ -512,5 +512,33 @@ public class SysUserServiceImpl extends BaseServiceImpl<SysUserMapper, SysUserEn
         return StreamUtils.toList(list, SysUserPostEntity::getPostId);
     }
 
+    /**
+     * 重新加密用户密码（用于密钥迁移）
+     * 登录成功后自动调用，将旧密钥加密的密码迁移到新密钥
+     *
+     * @param userId      用户ID
+     * @param rawPassword 明文密码
+     * @return 是否成功
+     */
+    @Override
+    public boolean reencryptPassword(Long userId, String rawPassword) {
+        try {
+            // 用新密钥重新加密密码
+            String newEncryptedPassword = SecurityUtils.encryptPassword(rawPassword);
+            // 更新数据库
+            SysUserEntity user = new SysUserEntity();
+            user.setId(userId);
+            user.setPassword(newEncryptedPassword);
+            int rows = baseMapper.updateById(user);
+            if (rows > 0) {
+                log.info("用户 ID {} 的密码已迁移到新密钥", userId);
+                return true;
+            }
+        } catch (Exception e) {
+            log.error("密码迁移失败，用户 ID {}: {}", userId, e.getMessage());
+        }
+        return false;
+    }
+
 
 }

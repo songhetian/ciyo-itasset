@@ -24,6 +24,7 @@
               </el-button>
               <el-button
                 type="danger"
+                plain
                 v-ripple
                 icon="ele-Delete"
                 :disabled="!selectedRows.length"
@@ -122,7 +123,9 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">取消</el-button>
-          <el-button :loading="saveLoading" type="primary" @click="submitForm">提交</el-button>
+          <el-button :loading="saveLoading" type="primary" @click="submitForm">
+            {{ saveLoading ? (form.id ? '保存中…' : '新增中…') : '提交' }}
+          </el-button>
         </div>
       </template>
     </el-dialog>
@@ -142,7 +145,7 @@
   } from '@/api/itam/depreciations'
   import { ElMessageBox } from 'element-plus'
   import { useTable } from '@/hooks/core/useTable'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import { download, resetFormRef } from '@/utils/business'
 
   defineOptions({
@@ -347,13 +350,17 @@
 
   const handleDelete = (row?: any) => {
     const ids = row?.id || selectedRows.value.map((item) => item.id).join(',')
-    ElMessageBox.confirm('是否确认删除编号为' + ids + '的数据项?', '警告')
-      .then(() => delDepreciations(ids))
-      .then(() => {
-        refreshData()
-        MessageUtil.success('删除成功')
-      })
-      .catch(() => {})
+    const isBatch = !row?.id
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delDepreciations(ids)
+        await refreshData()
+      },
+      {
+        itemName: '折旧规则',
+        count: isBatch ? selectedRows.value.length : undefined
+      }
+    )
   }
 
   // 取消按钮

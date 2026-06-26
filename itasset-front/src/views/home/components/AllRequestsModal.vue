@@ -74,7 +74,7 @@
           ? `${req.categoryName ? req.categoryName + ' ' : ''}${req.itemName}`
           : `${req.categoryName || getTypeLabel(req.itemType)} (未分配)`,
         allocatedItem: req.allocatedItemName,
-        date: req.createTime?.substring(0, 10) || '-',
+        date: formatDate(req.createTime),
         reason: req.reason || '无',
         approvalNote: req.approvalNote
       }))
@@ -126,6 +126,22 @@
         return 'danger'
       default:
         return 'info'
+    }
+  }
+
+  // 格式化日期为本地格式
+  const formatDate = (dateStr: string | undefined) => {
+    if (!dateStr) return '-'
+    try {
+      const date = new Date(dateStr)
+      if (isNaN(date.getTime())) return '-'
+      return new Intl.DateTimeFormat('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(date)
+    } catch {
+      return '-'
     }
   }
 </script>

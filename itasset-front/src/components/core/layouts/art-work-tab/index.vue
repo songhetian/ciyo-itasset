@@ -466,12 +466,14 @@
 </script>
 
 <style scoped>
+  /* === Modern Work Tab Styles === */
   .google-tab.activ-tab {
     color: var(--theme-color) !important;
     background-color: var(--el-color-primary-light-9) !important;
     border-bottom: 0 !important;
     border-bottom-right-radius: 0 !important;
     border-bottom-left-radius: 0 !important;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   .google-tab.activ-tab::before,
@@ -483,6 +485,7 @@
     content: '';
     border-radius: 50%;
     box-shadow: 0 0 0 30px var(--el-color-primary-light-9);
+    transition: box-shadow 0.2s ease;
   }
 
   .google-tab.activ-tab::before {
@@ -511,6 +514,7 @@
     background-color: var(--art-gray-200) !important;
     border-bottom: 1px solid var(--default-box-color) !important;
     border-radius: calc(var(--custom-radius) / 2.5 + 4px) !important;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
   .dark .google-tab:not(.activ-tab):hover {
@@ -521,6 +525,7 @@
   .google-tab.activ-tab .line,
   .google-tab:first-child .line {
     opacity: 0;
+    transition: opacity 0.15s ease;
   }
 
   .google-tab:hover + .google-tab .line,
@@ -552,8 +557,17 @@
   .google-tab i:hover {
     color: var(--art-gray-700);
     background: var(--art-gray-300);
+    transition: color 0.15s ease, background-color 0.15s ease;
   }
 
+  /* Close button hover effect */
+  .tad-200:hover {
+    background-color: var(--art-gray-200) !important;
+    transform: scale(1.1);
+    transition: transform 0.15s ease, background-color 0.15s ease;
+  }
+
+  /* Responsive adjustments */
   @media only screen and (width <= 768px) {
     .box-border.flex.justify-between {
       padding-right: 0.625rem;

@@ -7,11 +7,11 @@ export const useSystemStore = defineStore(
   'systemStore',
   () => {
     const systemInfo = ref<SystemBasicConfig>({
-      name: '',
-      description: '',
+      name: '雷犀IT资产管理系统',
+      description: '专业的企业资产管理系统',
       logoImg: '',
       favicon: '',
-      copyright: '',
+      copyright: '<p>Copyright © 2018-2026 雷犀 All Rights Reserved.</p>',
       backgroundImage: ''
     })
 
@@ -19,7 +19,13 @@ export const useSystemStore = defineStore(
       try {
         const res: any = await getSystemInfoConfig()
         if (typeof res === 'string') {
-          systemInfo.value = JSON.parse(decodeURIComponent(escape(atob(res))))
+          const binaryString = atob(res)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          const decoded = new TextDecoder('UTF-8').decode(bytes)
+          systemInfo.value = JSON.parse(decoded)
         } else {
           systemInfo.value = res
         }

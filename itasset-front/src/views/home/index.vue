@@ -117,53 +117,57 @@
 
     <!-- Quick Actions -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      <div
-        class="bg-white border border-gray-100 rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+      <button
+        type="button"
+        class="bg-white border border-gray-100 rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
         @click="showRequestModal = true"
       >
         <div
-          class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+          class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center transition-transform duration-300 hover:scale-110"
         >
           <ArtSvgIcon icon="ri:add-circle-line" class="text-2xl" />
         </div>
         <span class="text-sm font-medium text-gray-700">设备申请</span>
-      </div>
+      </button>
 
-      <div
-        class="bg-white border border-gray-100 rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+      <button
+        type="button"
+        class="bg-white border border-gray-100 rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2"
         @click="showRepairModal = true"
       >
         <div
-          class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+          class="w-12 h-12 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center transition-transform duration-300 hover:scale-110"
         >
           <ArtSvgIcon icon="ri:tools-line" class="text-2xl" />
         </div>
         <span class="text-sm font-medium text-gray-700">故障报修</span>
-      </div>
+      </button>
 
-      <div
-        class="bg-white border border-gray-100 rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+      <button
+        type="button"
+        class="bg-white border border-gray-100 rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 focus-visible:ring-offset-2"
         @click="showReturnModal = true"
       >
         <div
-          class="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+          class="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center transition-transform duration-300 hover:scale-110"
         >
           <ArtSvgIcon icon="ri:exchange-line" class="text-2xl" />
         </div>
         <span class="text-sm font-medium text-gray-700">设备归还</span>
-      </div>
+      </button>
 
-      <div
-        class="bg-white border border-gray-100 rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+      <button
+        type="button"
+        class="bg-white border border-gray-100 rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:shadow-md hover:-translate-y-1 transition-all duration-300 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2"
         @click="handleCustomerService"
       >
         <div
-          class="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+          class="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center transition-transform duration-300 hover:scale-110"
         >
           <ArtSvgIcon icon="ri:customer-service-2-line" class="text-2xl" />
         </div>
         <span class="text-sm font-medium text-gray-700">联系客服</span>
-      </div>
+      </button>
     </div>
 
     <!-- Requests List -->
@@ -323,7 +327,7 @@
           ? `${req.categoryName ? req.categoryName + ' ' : ''}${req.itemName}`
           : `${req.categoryName || getTypeLabel(req.itemType)} (未分配)`,
         allocatedItem: req.allocatedItemName,
-        date: req.createTime?.substring(0, 10) || '-',
+        date: formatDate(req.createTime),
         reason: req.reason || '无',
         approvalNote: req.approvalNote
       }))
@@ -387,6 +391,22 @@
         return 'ri:close-circle-line'
       default:
         return 'ri:question-fill'
+    }
+  }
+
+  // 格式化日期为本地格式
+  const formatDate = (dateStr: string | undefined) => {
+    if (!dateStr) return '-'
+    try {
+      const date = new Date(dateStr)
+      if (isNaN(date.getTime())) return '-'
+      return new Intl.DateTimeFormat('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).format(date)
+    } catch {
+      return '-'
     }
   }
 </script>

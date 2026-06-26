@@ -278,3 +278,146 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+// === 全局页面布局优化 ===
+.page-content {
+  padding: 12px 16px 16px;
+}
+
+// 页面内容区域滚动条优化
+.page-content::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.page-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.page-content::-webkit-scrollbar-thumb {
+  background-color: var(--art-gray-300);
+  border-radius: 4px;
+
+  &:hover {
+    background-color: var(--art-gray-400);
+  }
+}
+
+// 通用间距工具类
+.art-mt-4 {
+  margin-top: 4px;
+}
+
+.art-mt-8 {
+  margin-top: 8px;
+}
+
+.art-mt-12 {
+  margin-top: 12px;
+}
+
+.art-mt-16 {
+  margin-top: 16px;
+}
+
+.art-mt-20 {
+  margin-top: 20px;
+}
+
+.art-mb-4 {
+  margin-bottom: 4px;
+}
+
+.art-mb-8 {
+  margin-bottom: 8px;
+}
+
+.art-mb-12 {
+  margin-bottom: 12px;
+}
+
+.art-mb-16 {
+  margin-bottom: 16px;
+}
+
+.art-mb-20 {
+  margin-bottom: 20px;
+}
+
+.art-p-8 {
+  padding: 8px;
+}
+
+.art-p-12 {
+  padding: 12px;
+}
+
+.art-p-16 {
+  padding: 16px;
+}
+
+.art-p-20 {
+  padding: 20px;
+}
+
+// 文字截断
+.art-text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.art-text-ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+// Flex 布局工具
+.art-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.art-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.art-flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.art-flex-end {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+// 表格卡片内边距优化
+.art-table-card {
+  .el-card__body {
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+// 搜索栏卡片优化
+.art-search-bar {
+  border-radius: 8px;
+
+  .el-card__body {
+    padding: 0 !important;
+  }
+}
+
+// 按钮组间距优化
+.el-button + .el-button {
+  margin-left: 8px;
+}

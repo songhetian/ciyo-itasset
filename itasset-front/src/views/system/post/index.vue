@@ -31,6 +31,7 @@
               :disabled="!selectedRows.length"
               v-hasPermi="['system:post:remove']"
               type="danger"
+              plain
               v-ripple
             >
               {{ t('common.delete') }}
@@ -107,8 +108,8 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="cancel">{{ t('common.cancel') }}</el-button>
-          <el-button type="primary" @click="submitForm">
-            {{ t('common.confirm') }}
+          <el-button type="primary" :loading="saveLoading" @click="submitForm">
+            {{ saveLoading ? t('common.saving') : t('common.confirm') }}
           </el-button>
         </div>
       </template>
@@ -134,7 +135,7 @@
   } from '@/api/system/post'
   import { DictDataEntity, getDicts } from '@/api/system/dict/data'
   import { download, parseTime } from '@/utils/business'
-  import { MessageUtil } from '@/utils/messageUtil'
+  import { MessageUtil, MessageBoxUtil } from '@/utils/messageUtil'
   import PostSearch from './modules/post-search.vue'
 
   defineOptions({ name: 'PostManagement' })
@@ -160,6 +161,8 @@
 
   // Export related
   const exportLoading = ref(false)
+  // 提交loading状态
+  const saveLoading = ref(false)
 
   // Show search bar
   const showSearch = ref(true)
@@ -343,6 +346,7 @@
   const submitForm = () => {
     formRef.value?.validate(async (valid) => {
       if (valid) {
+        saveLoading.value = true
         try {
           if (form.id !== undefined) {
             await updatePost(form)
@@ -355,6 +359,8 @@
           await refreshData()
         } catch (error) {
           console.error('提交失败:', error)
+        } finally {
+          saveLoading.value = false
         }
       }
     })
@@ -373,21 +379,17 @@
 
   // Delete post (batch or single)
   const handleDelete = (postIds: any) => {
-    ElMessageBox.confirm(t('system.position.confirmDelete'), t('common.warning'), {
-      confirmButtonText: t('common.confirm'),
-      cancelButtonText: t('common.cancel'),
-      type: 'warning'
-    })
-      .then(async () => {
-        try {
-          await delPost(postIds)
-          MessageUtil.success(t('system.position.deleteSuccess'))
-          await refreshData()
-        } catch (error) {
-          console.error('删除失败:', error)
-        }
-      })
-      .catch(() => {})
+    const isBatch = typeof postIds === 'string' && postIds.includes(',')
+    MessageBoxUtil.confirmDelete(
+      async () => {
+        await delPost(postIds)
+        await refreshData()
+      },
+      {
+        itemName: '岗位',
+        count: isBatch ? selectedRows.value.length : undefined
+      }
+    )
   }
 
   // Export

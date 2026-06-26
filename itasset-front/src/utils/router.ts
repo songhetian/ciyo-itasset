@@ -32,12 +32,19 @@ export const configureNProgress = () => {
  */
 export const setPageTitle = (to: RouteLocationNormalized): void => {
   const { title } = to.meta
-  if (title) {
-    const systemStore = useSystemStore()
-    setTimeout(() => {
-      document.title = `${formatMenuTitle(String(title))} - ${systemStore.systemInfo.name}`
-    }, 150)
-  }
+  const systemStore = useSystemStore()
+  const systemName = systemStore.systemInfo?.name || '雷犀IT资产管理系统'
+  const pageTitle = title ? formatMenuTitle(String(title)) : ''
+
+  setTimeout(() => {
+    if (pageTitle && systemName) {
+      document.title = `${pageTitle} - ${systemName}`
+    } else if (pageTitle) {
+      document.title = pageTitle
+    } else if (systemName) {
+      document.title = systemName
+    }
+  }, 150)
 }
 
 /**

@@ -51,7 +51,9 @@
 
       <template #empty>
         <div v-if="loading"></div>
-        <ElEmpty v-else :description="emptyText" :image-size="120" />
+        <ArtEmptyState v-else :title="emptyText" type="empty">
+          <slot name="empty-action"></slot>
+        </ArtEmptyState>
       </template>
     </ElTable>
 
@@ -78,6 +80,7 @@
   import { useCommon } from '@/hooks/core/useCommon'
   import { useTableHeight } from '@/hooks/core/useTableHeight'
   import { useResizeObserver, useWindowSize } from '@vueuse/core'
+  import ArtEmptyState from '@/components/core/base/art-empty-state/index.vue'
 
   defineOptions({ name: 'ArtTable' })
 

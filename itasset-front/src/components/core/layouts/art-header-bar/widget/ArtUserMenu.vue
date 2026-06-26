@@ -14,14 +14,14 @@
     <template #reference>
       <img
         class="size-8.5 mr-5 c-p rounded-full max-sm:w-6.5 max-sm:h-6.5 max-sm:mr-[16px]"
-        :src="userInfo.avatar"
+        :src="getAvatar"
         alt="avatar"
       />
     </template>
     <template #default>
       <div class="pt-3">
         <div class="flex-c pb-1 px-0">
-          <img class="w-10 h-10 mr-3 ml-0 overflow-hidden rounded-full float-left" :src="userInfo.avatar" />
+          <img class="w-10 h-10 mr-3 ml-0 overflow-hidden rounded-full float-left" :src="getAvatar" />
           <div class="w-[calc(100%-60px)] h-full">
             <span class="block text-sm font-medium text-g-800 truncate">{{ userInfo.userName }}</span>
             <span class="block mt-0.5 text-xs text-g-500 truncate">{{ userInfo.email }}</span>
@@ -59,7 +59,7 @@
   const { t } = useI18n()
   const userStore = useUserStore()
 
-  const { getUserInfo: userInfo } = storeToRefs(userStore)
+  const { getUserInfo: userInfo, getAvatar } = storeToRefs(userStore)
   const userMenuPopover = ref()
 
   /**

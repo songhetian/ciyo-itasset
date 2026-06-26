@@ -22,6 +22,14 @@
       z-index: 50;
       flex-shrink: 0;
       width: 100%;
+      // Modern sticky header enhancement
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+
+      // Glass effect when scrolled
+      &:has(+ #app-content .layout-content:not(:first-child)) {
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+      }
     }
 
     #app-content {
@@ -42,6 +50,53 @@
           border-radius: calc(var(--custom-radius) / 2 + 2px) !important;
         }
       }
+    }
+  }
+}
+
+// === Header Scroll Enhancement ===
+// Add subtle shadow when content scrolls below header
+.app-layout #app-main {
+  scroll-timeline: --header-scroll;
+}
+
+@supports (scroll-timeline: --header-scroll) {
+  @keyframes header-shadow {
+    from {
+      box-shadow: none;
+    }
+    to {
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  #app-header {
+    animation: header-shadow linear;
+    animation-timeline: --header-scroll;
+    animation-range: 0 100px;
+  }
+}
+
+// Fallback for browsers without scroll-timeline support
+@supports not (scroll-timeline: --header-scroll) {
+  // Use a simpler approach - add subtle border instead
+  #app-header {
+    border-bottom: 1px solid transparent;
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        var(--art-gray-200) 20%,
+        var(--art-gray-200) 80%,
+        transparent
+      );
     }
   }
 }

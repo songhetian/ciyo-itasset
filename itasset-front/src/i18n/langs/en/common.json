@@ -41,5 +41,8 @@
   "exportConfirm": "Are you sure to export all data?",
   "enable": "Enable",
   "disable": "Disable",
-  "import": "Import"
+  "import": "Import",
+  "saving": "Saving…",
+  "adding": "Adding…",
+  "deleting": "Deleting…"
 }

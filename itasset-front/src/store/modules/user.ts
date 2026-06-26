@@ -42,6 +42,7 @@ import {setPageTitle} from '@/utils/router'
 import {resetRouterState} from '@/router/guards/beforeEach'
 import {useMenuStore} from './menu'
 import {StorageConfig} from '@/utils/storage/storage-config'
+import defaultAvatar from '@/assets/images/svg/default-avatar.svg'
 import UserInfo = Api.Auth.UserInfo;
 
 /**
@@ -70,6 +71,11 @@ export const useUserStore = defineStore(
 
     // 计算属性：获取用户信息
     const getUserInfo = computed(() => info.value)
+    // 计算属性：获取头像（带默认值）
+    const getAvatar = computed(() => {
+      const avatar = info.value.avatar
+      return avatar && avatar.trim() !== '' ? avatar : defaultAvatar
+    })
     // 计算属性：获取设置状态
     const getSettingState = computed(() => useSettingStore().$state)
     // 计算属性：获取工作台状态
@@ -215,6 +221,7 @@ export const useUserStore = defineStore(
       accessToken,
       refreshToken,
       getUserInfo,
+      getAvatar,
       getSettingState,
       getWorktabState,
       setUserInfo,
